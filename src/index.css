@@ -1035,6 +1035,32 @@ footer p { color: var(--text-secondary); font-size: 14px; }
   color: var(--text-secondary);
   opacity: 0.6;
 }
+.auth-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.auth-password-wrapper input {
+  padding-inline-end: 44px;
+}
+.auth-password-toggle {
+  position: absolute;
+  inset-inline-end: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+.auth-password-toggle:hover {
+  color: var(--text);
+}
 .auth-error {
   background: rgba(248,81,73,0.1);
   border: 1px solid rgba(248,81,73,0.3);
