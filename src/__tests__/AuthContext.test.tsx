@@ -11,7 +11,7 @@ vi.mock('../lib/api', () => ({
 import { apiFetch } from '../lib/api';
 
 const mockUser = {
-  _id: 'user1',
+  id: 'user1',
   displayName: 'Test Buyer',
   email: 'test-buyer@alphacar.com',
   role: 'buyer',

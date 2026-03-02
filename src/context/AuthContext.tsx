@@ -2,12 +2,14 @@ import { createContext, useContext, useState, useCallback, useEffect, type React
 import { apiFetch } from '../lib/api';
 
 interface User {
-  _id: string;
+  id: string;
   displayName: string;
   email: string;
   phone?: string;
   role?: string;
-  profileImage?: string;
+  profilePicture?: string;
+  bio?: string;
+  isVerified?: boolean;
   createdAt?: string;
 }
 

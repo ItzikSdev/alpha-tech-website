@@ -72,8 +72,8 @@ export default function SettingsPage() {
         {/* User Profile */}
         <div className="settings-profile">
           <div className="settings-avatar">
-            {user?.profileImage ? (
-              <img src={user.profileImage} alt={user.displayName} />
+            {user?.profilePicture ? (
+              <img src={user.profilePicture} alt={user.displayName} />
             ) : (
               <span>{user?.displayName?.[0]?.toUpperCase() || '?'}</span>
             )}

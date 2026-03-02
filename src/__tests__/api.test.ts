@@ -64,11 +64,11 @@ describe('apiFetch', () => {
     );
   });
 
-  it('throws error with server message on non-ok response', async () => {
+  it('throws error with nested error.message (real backend format)', async () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: false,
       status: 401,
-      json: () => Promise.resolve({ message: 'Invalid credentials' }),
+      json: () => Promise.resolve({ success: false, error: { code: 401, message: 'Invalid credentials' } }),
     } as Response);
 
     await expect(apiFetch('/auth/login', { method: 'POST', body: {} })).rejects.toThrow(
@@ -76,11 +76,11 @@ describe('apiFetch', () => {
     );
   });
 
-  it('throws error with fallback message when server returns error field', async () => {
+  it('throws error with top-level message as fallback', async () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: false,
       status: 500,
-      json: () => Promise.resolve({ error: 'Internal error' }),
+      json: () => Promise.resolve({ message: 'Internal error' }),
     } as Response);
 
     await expect(apiFetch('/test')).rejects.toThrow('Internal error');
