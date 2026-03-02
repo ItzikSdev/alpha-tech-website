@@ -41,8 +41,15 @@ jobs:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
           VITE_APPLE_CLIENT_ID: ${{ secrets.VITE_APPLE_CLIENT_ID }}
 
-      - name: Copy 404.html for SPA routing
-        run: cp dist/index.html dist/404.html
+      - name: Create SPA route files for 200 status
+        run: |
+          # Copy index.html to all SPA routes so GitHub Pages returns 200
+          for route in login terms privacy contact delete-account settings privacy/delete-data; do
+            mkdir -p "dist/$route"
+            cp dist/index.html "dist/$route/index.html"
+          done
+          # Also keep 404.html as fallback for unknown routes
+          cp dist/index.html dist/404.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
