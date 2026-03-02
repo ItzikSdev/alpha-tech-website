@@ -27,6 +27,7 @@ export default function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/delete-account" element={<DeleteAccountPage />} />
+            <Route path="/privacy/delete-data" element={<DeleteAccountPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
