@@ -58,6 +58,10 @@ export default function SettingsPage() {
     ? new Date(user.createdAt).toLocaleDateString()
     : '—';
 
+  const lastLoginDate = user?.lastLoginAt
+    ? new Date(user.lastLoginAt).toLocaleString()
+    : '—';
+
   return (
     <div className="page-container">
       <div className="auth-card settings-card">
@@ -95,6 +99,10 @@ export default function SettingsPage() {
           <div className="settings-row">
             <span className="settings-label">{t('settings.memberSince')}</span>
             <span className="settings-value">{createdDate}</span>
+          </div>
+          <div className="settings-row">
+            <span className="settings-label">{t('settings.lastLogin')}</span>
+            <span className="settings-value">{lastLoginDate}</span>
           </div>
         </div>
 

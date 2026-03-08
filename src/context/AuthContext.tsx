@@ -11,6 +11,7 @@ interface User {
   bio?: string;
   isVerified?: boolean;
   createdAt?: string;
+  lastLoginAt?: string;
 }
 
 interface AuthContextType {
