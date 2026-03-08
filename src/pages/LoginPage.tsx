@@ -228,6 +228,7 @@ export default function LoginPage() {
             </button>
           )}
 
+          {/* Apple OAuth — disabled until fully configured
           {APPLE_CLIENT_ID && (
             <button
               type="button"
@@ -239,6 +240,7 @@ export default function LoginPage() {
               <span>{t('login.apple')}</span>
             </button>
           )}
+          */}
         </div>
 
         <p className="auth-footer-text">
