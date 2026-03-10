@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 
-// Backend base URL — set VITE_API_BASE_URL in .env, e.g. https://api.alphacar.co
-const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? '';
+// Backend base URL — reads VITE_API_URL (same env var used by the rest of the site)
+const API_BASE = (import.meta as any).env?.VITE_API_URL ?? 'https://api.alpha-tech.live';
 
 interface ServerPlan {
   id: string;
