@@ -65,6 +65,7 @@ export default function Navbar() {
           <li><a href="/#features" onClick={() => setMenuOpen(false)}>{t('nav.features')}</a></li>
           <li><a href="/#ai" onClick={() => setMenuOpen(false)}>{t('nav.ai')}</a></li>
           <li><a href="/#showcase" onClick={() => setMenuOpen(false)}>{t('nav.gallery')}</a></li>
+          <li><Link to="/plans" onClick={() => setMenuOpen(false)}>{t('nav.plans')}</Link></li>
           <li><a href="/#download" className="nav-cta" onClick={() => setMenuOpen(false)}>{t('nav.download')}</a></li>
           <li>
             {isLoggedIn ? (
