@@ -145,6 +145,51 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* BUYER AI SEARCH SECTION */}
+      <section className="buyer-ai-section" id="buyer-search">
+        <div className="section-inner">
+          <div className="buyer-ai-badge reveal">
+            <span className="badge-pill">✨ {t('buyerAI.badge')}</span>
+          </div>
+          <div className="buyer-ai-grid">
+            <div className="buyer-ai-chat-demo reveal">
+              <div className="ai-chat-header">
+                <div className="ai-avatar" style={{ background: 'linear-gradient(135deg, #22D3EE, #0ea5e9)' }}>🔍</div>
+                <div>
+                  <div className="name">{t('buyerAI.chatAgent')}</div>
+                  <div className="status">{t('buyerAI.chatStatus')}</div>
+                </div>
+              </div>
+              <div className="chat-messages">
+                <div className="chat-bubble user">{t('buyerAI.chatUser1')}</div>
+                <div className="chat-bubble ai" style={{ whiteSpace: 'pre-line' }}>{t('buyerAI.chatAI1')}</div>
+                <div className="chat-bubble user">{t('buyerAI.chatUser2')}</div>
+                <div className="chat-bubble ai">{t('buyerAI.chatAI2')}</div>
+              </div>
+            </div>
+            <div className="buyer-ai-text reveal">
+              <h2>{t('buyerAI.title')}</h2>
+              <p>{t('buyerAI.subtitle')}</p>
+              <div className="ai-features">
+                {[
+                  { icon: '🗣️', titleKey: 'buyerAI.feature1.title', descKey: 'buyerAI.feature1.desc' },
+                  { icon: '🎯', titleKey: 'buyerAI.feature2.title', descKey: 'buyerAI.feature2.desc' },
+                  { icon: '❤️', titleKey: 'buyerAI.feature3.title', descKey: 'buyerAI.feature3.desc' },
+                ].map((f) => (
+                  <div className="ai-feature" key={f.titleKey}>
+                    <div className="ai-feature-icon">{f.icon}</div>
+                    <div>
+                      <h4>{t(f.titleKey)}</h4>
+                      <p>{t(f.descKey)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* SHOWCASE */}
       <section className="showcase" id="showcase">
         <div className="section-inner">
