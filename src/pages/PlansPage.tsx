@@ -153,7 +153,7 @@ export default function PlansPage() {
 
                 {/* Features */}
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, flex: 1, marginBottom: 24 }}>
-                  {plan.features.map((f, i) => (
+                  {(plan.features ?? []).map((f, i) => (
                     <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'flex-end', color: 'var(--text)', fontSize: 14 }}>
                       <span style={{ order: 1 }}>{f}</span>
                       <span style={{ color: 'var(--accent)', flexShrink: 0 }}>✓</span>
