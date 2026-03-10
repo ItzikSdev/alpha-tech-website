@@ -44,7 +44,7 @@ jobs:
       - name: Create SPA route files for 200 status
         run: |
           # Copy index.html to all SPA routes so GitHub Pages returns 200
-          for route in login terms privacy contact delete-account settings privacy/delete-data; do
+          for route in login terms privacy contact delete-account settings privacy/delete-data plans; do
             mkdir -p "dist/$route"
             cp dist/index.html "dist/$route/index.html"
           done

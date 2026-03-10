@@ -96,8 +96,19 @@ const PLAN_DATA: Record<string, {
   },
 };
 
+// Fetch live ILS→USD rate from Frankfurter (no API key needed)
+async function fetchIlsToUsdRate(): Promise<number> {
+  try {
+    const r = await fetch('https://api.frankfurter.app/latest?from=ILS&to=USD');
+    const d = await r.json();
+    return d?.rates?.USD ?? 0.27;
+  } catch {
+    return 0.27; // fallback ~3.7 ILS per dollar
+  }
+}
+
 // Build display plans, merging live prices from API with static display data
-function buildDisplayPlans(lang: Lang, apiProducts?: any[]): DisplayPlan[] {
+function buildDisplayPlans(lang: Lang, apiProducts?: any[], ilsToUsd = 0.27): DisplayPlan[] {
   // Index API products by id (new format) or productId (old format)
   const apiMap: Record<string, any> = {};
   for (const p of apiProducts ?? []) {
@@ -109,14 +120,16 @@ function buildDisplayPlans(lang: Lang, apiProducts?: any[]): DisplayPlan[] {
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((plan) => {
       const api = apiMap[plan.id];
+      const priceILS = api?.priceILS ?? plan.priceILS;
+      // priceUSD: prefer backend value, otherwise calculate from live rate
+      const priceUSD = api?.priceUSD ?? parseFloat((priceILS * ilsToUsd).toFixed(2));
       return {
         id: plan.id,
         productId: plan.productId,
         name: plan.name[lang],
         features: plan.features[lang],
-        priceILS: api?.priceILS ?? plan.priceILS,
-        // Use priceUSD from API (which includes live exchange rate) when available
-        priceUSD: api?.priceUSD ?? plan.priceUSD,
+        priceILS,
+        priceUSD,
         period: plan.period ? plan.period[lang] : null,
         highlight: plan.highlight,
         sortOrder: plan.sortOrder,
@@ -132,20 +145,19 @@ export default function PlansPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Always show fallback immediately on lang change
     setDisplayPlans(buildDisplayPlans(apiLang));
     setLoading(true);
 
-    fetch(`${API_BASE}/api/v1/purchases/products?lang=${apiLang}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.success && d.products?.length) {
-          // Merge: use hardcoded names/features, override prices from API
-          setDisplayPlans(buildDisplayPlans(apiLang, d.products));
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    // Fetch exchange rate and API plans in parallel
+    Promise.all([
+      fetchIlsToUsdRate(),
+      fetch(`${API_BASE}/api/v1/purchases/products?lang=${apiLang}`)
+        .then((r) => r.json())
+        .catch(() => null),
+    ]).then(([ilsToUsd, d]) => {
+      const apiProducts = d?.success && d.products?.length ? d.products : undefined;
+      setDisplayPlans(buildDisplayPlans(apiLang, apiProducts, ilsToUsd));
+    }).finally(() => setLoading(false));
   }, [lang]);
 
   return (
@@ -230,7 +242,7 @@ export default function PlansPage() {
                 </span>
                 {plan.priceILS > 0 && (
                   <span style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
-                    / ${plan.priceUSD}
+                    / ~${plan.priceUSD}
                   </span>
                 )}
                 {plan.period && (
