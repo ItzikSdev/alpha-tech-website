@@ -12,7 +12,7 @@ export default function TermsPage() {
         </Link>
         <h2>{t('terms.title')}</h2>
         <p><strong>{t('terms.updated')}</strong></p>
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+        {[1, 2, 3, 4, 5, 6, 7].map((i) => (
           <div key={i}>
             <h3>{t(`terms.s${i}.title`)}</h3>
             <p>{t(`terms.s${i}.text`)}</p>
