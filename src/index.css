@@ -779,6 +779,76 @@ html[dir="ltr"] .lang-dropdown { left: 0; }
   box-shadow: 0 0 40px rgba(34,211,238,0.06);
 }
 
+/* ── MAINTENANCE SECTION ── */
+.maintenance-section {
+  padding: 120px 24px;
+  background: linear-gradient(180deg, transparent 0%, rgba(245,158,11,0.03) 50%, transparent 100%);
+}
+.maintenance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.maintenance-text h2 {
+  font-size: clamp(28px, 3.5vw, 38px);
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+.maintenance-text p {
+  color: var(--text-secondary);
+  font-size: 17px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.maintenance-phones {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0;
+  height: 480px;
+}
+.maintenance-phone {
+  position: absolute;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.maintenance-phone img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.maintenance-phone-front {
+  width: 180px;
+  height: 380px;
+  z-index: 3;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.maintenance-phone-back {
+  width: 155px;
+  height: 330px;
+  z-index: 1;
+  left: 15%;
+  top: 50%;
+  transform: translateY(-50%) rotate(-8deg);
+  opacity: 0.85;
+}
+.maintenance-phone-side {
+  width: 155px;
+  height: 330px;
+  z-index: 2;
+  right: 10%;
+  top: 50%;
+  transform: translateY(-50%) rotate(8deg);
+  opacity: 0.85;
+}
+
 /* ── CTA ── */
 .cta {
   padding: 120px 24px;
@@ -1537,6 +1607,12 @@ html[data-theme="light"] .mobile-menu span {
   .floating-card { display: none; }
   .features { padding: 60px 16px; }
   .features-grid { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+  .maintenance-section { padding: 60px 16px; }
+  .maintenance-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+  .maintenance-phones { order: -1; height: 320px; }
+  .maintenance-phone-front { width: 140px; height: 290px; }
+  .maintenance-phone-back { width: 120px; height: 250px; left: 8%; }
+  .maintenance-phone-side { width: 120px; height: 250px; right: 5%; }
   .showcase { padding: 60px 16px; }
   .showcase-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; }
   .showcase-phones { order: -1; }

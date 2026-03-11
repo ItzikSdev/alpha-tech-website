@@ -5,6 +5,8 @@ const images = [
   '/images/IMG_3465.PNG',
   '/images/IMG_3470.PNG',
   '/images/IMG_3467.PNG',
+  '/images/maintenance-list.PNG',
+  '/images/maintenance-detail.PNG',
 ];
 
 export default function PhoneCarousel() {

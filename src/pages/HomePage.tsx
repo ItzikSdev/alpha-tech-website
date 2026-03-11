@@ -92,6 +92,7 @@ export default function HomePage() {
               { icon: '🌐', titleKey: 'features.multi.title', descKey: 'features.multi.desc' },
               { icon: '📈', titleKey: 'features.leads.title', descKey: 'features.leads.desc' },
               { icon: '🔔', titleKey: 'features.notifications.title', descKey: 'features.notifications.desc' },
+              { icon: '🔧', titleKey: 'features.maintenance.title', descKey: 'features.maintenance.desc' },
             ].map((f) => (
               <div className="feature-card reveal" key={f.titleKey}>
                 <div className="feature-icon">{f.icon}</div>
@@ -184,6 +185,47 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MAINTENANCE SECTION */}
+      <section className="maintenance-section" id="maintenance">
+        <div className="section-inner">
+          <div className="buyer-ai-badge reveal">
+            <span className="badge-pill">🔧 {t('maintenance.badge')}</span>
+          </div>
+          <div className="maintenance-grid">
+            <div className="maintenance-text reveal">
+              <h2>{t('maintenance.sectionTitle')}</h2>
+              <p>{t('maintenance.sectionSubtitle')}</p>
+              <div className="ai-features">
+                {[
+                  { icon: '🔍', titleKey: 'maintenance.feat1.title', descKey: 'maintenance.feat1.desc' },
+                  { icon: '📋', titleKey: 'maintenance.feat2.title', descKey: 'maintenance.feat2.desc' },
+                  { icon: '⚠️', titleKey: 'maintenance.feat3.title', descKey: 'maintenance.feat3.desc' },
+                ].map((f) => (
+                  <div className="ai-feature" key={f.titleKey}>
+                    <div className="ai-feature-icon">{f.icon}</div>
+                    <div>
+                      <h4>{t(f.titleKey)}</h4>
+                      <p>{t(f.descKey)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="maintenance-phones reveal">
+              <div className="maintenance-phone maintenance-phone-back">
+                <img src="/images/maintenance-record.PNG" alt="Add service record" />
+              </div>
+              <div className="maintenance-phone maintenance-phone-front">
+                <img src="/images/maintenance-detail.PNG" alt="Vehicle maintenance detail" />
+              </div>
+              <div className="maintenance-phone maintenance-phone-side">
+                <img src="/images/maintenance-list.PNG" alt="Maintenance list" />
               </div>
             </div>
           </div>
