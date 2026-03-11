@@ -219,13 +219,13 @@ export default function HomePage() {
             </div>
             <div className="maintenance-phones reveal">
               <div className="maintenance-phone maintenance-phone-back">
-                <img src="/images/maintenance-record.PNG" alt="Add service record" />
+                <img src="/images/maintenance-record.jpg" alt="Add service record" />
               </div>
               <div className="maintenance-phone maintenance-phone-front">
-                <img src="/images/maintenance-detail.PNG" alt="Vehicle maintenance detail" />
+                <img src="/images/maintenance-detail.jpg" alt="Vehicle maintenance detail" />
               </div>
               <div className="maintenance-phone maintenance-phone-side">
-                <img src="/images/maintenance-list.PNG" alt="Maintenance list" />
+                <img src="/images/maintenance-list.jpg" alt="Maintenance list" />
               </div>
             </div>
           </div>

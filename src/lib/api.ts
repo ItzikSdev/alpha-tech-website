@@ -25,6 +25,12 @@ export async function apiFetch<T = unknown>(path: string, options: ApiOptions = 
   const data = await res.json();
 
   if (!res.ok) {
+    // Session expired or replaced by another device — auto-logout
+    if (res.status === 401 && token) {
+      localStorage.removeItem('ac-token');
+      window.location.href = '/';
+      throw new Error('SESSION_EXPIRED');
+    }
     throw new Error(data.error?.message || data.message || `Request failed (${res.status})`);
   }
 
