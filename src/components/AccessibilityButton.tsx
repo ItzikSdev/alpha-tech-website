@@ -130,18 +130,18 @@ export default function AccessibilityButton() {
           bottom: 80,
           left: 20,
           width: 280,
-          backgroundColor: 'var(--card-bg, #1C2128)',
-          border: '1px solid var(--border, #30363D)',
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: 16,
           padding: 16,
           zIndex: 9999,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--text, #F0F6FC)' }}>
+            <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>
               {t('accessibility.btn.title')}
             </span>
-            <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted, #8B949E)', cursor: 'pointer', fontSize: 18 }}>✕</button>
+            <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 18 }}>✕</button>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -156,9 +156,9 @@ export default function AccessibilityButton() {
                   gap: 4,
                   padding: '10px 8px',
                   borderRadius: 10,
-                  border: opt.active ? '2px solid var(--accent, #22D3EE)' : '1px solid var(--border, #30363D)',
-                  backgroundColor: opt.active ? 'rgba(34, 211, 238, 0.15)' : 'transparent',
-                  color: opt.active ? 'var(--accent, #22D3EE)' : 'var(--text, #F0F6FC)',
+                  border: opt.active ? '2px solid var(--accent)' : '1px solid var(--border)',
+                  backgroundColor: opt.active ? 'color-mix(in srgb, var(--accent) 15%, transparent)' : 'transparent',
+                  color: opt.active ? 'var(--accent)' : 'var(--text)',
                   cursor: 'pointer',
                   fontSize: 12,
                   fontWeight: 600,
@@ -178,9 +178,9 @@ export default function AccessibilityButton() {
                 flex: 1,
                 padding: '8px 0',
                 borderRadius: 8,
-                border: '1px solid var(--border, #30363D)',
+                border: '1px solid var(--border)',
                 backgroundColor: 'transparent',
-                color: 'var(--text-muted, #8B949E)',
+                color: 'var(--text-secondary)',
                 cursor: 'pointer',
                 fontSize: 12,
                 fontWeight: 600,
@@ -195,8 +195,8 @@ export default function AccessibilityButton() {
                 flex: 1,
                 padding: '8px 0',
                 borderRadius: 8,
-                backgroundColor: 'var(--accent, #22D3EE)',
-                color: '#0D1117',
+                backgroundColor: 'var(--accent)',
+                color: '#fff',
                 textAlign: 'center',
                 textDecoration: 'none',
                 fontSize: 12,
