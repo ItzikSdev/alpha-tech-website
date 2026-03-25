@@ -12,6 +12,7 @@ import DeleteAccountPage from './pages/DeleteAccountPage';
 import LoginPage from './pages/LoginPage';
 import SettingsPage from './pages/SettingsPage';
 import PlansPage from './pages/PlansPage';
+import AccessibilityPage from './pages/AccessibilityPage';
 import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="/privacy/delete-data" element={<DeleteAccountPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/accessibility" element={<AccessibilityPage />} />
             <Route path="/plans" element={<PlansPage />} />
           </Routes>
           <Footer />

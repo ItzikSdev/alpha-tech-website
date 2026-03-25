@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function TermsPage() {
+export default function AccessibilityPage() {
   const { t } = useLanguage();
 
   return (
@@ -10,12 +10,12 @@ export default function TermsPage() {
         <Link to="/" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 14, display: 'inline-block', marginBottom: 20 }}>
           &larr; {t('page.backHome')}
         </Link>
-        <h2>{t('terms.title')}</h2>
-        <p><strong>{t('terms.updated')}</strong></p>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+        <h2>{t('accessibility.title')}</h2>
+        <p><strong>{t('accessibility.updated')}</strong></p>
+        {[1, 2, 3, 4, 5].map((i) => (
           <div key={i}>
-            <h3>{t(`terms.s${i}.title`)}</h3>
-            <p>{t(`terms.s${i}.text`)}</p>
+            <h3>{t(`accessibility.s${i}.title`)}</h3>
+            <p>{t(`accessibility.s${i}.text`)}</p>
           </div>
         ))}
       </div>

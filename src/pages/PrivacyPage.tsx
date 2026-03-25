@@ -20,7 +20,7 @@ export default function PrivacyPage() {
           ))}
         </ul>
 
-        {[2, 3, 4, 5].map((i) => (
+        {[2, 3, 4, 5, 6].map((i) => (
           <div key={i}>
             <h3>{t(`privacy.s${i}.title`)}</h3>
             <p>{t(`privacy.s${i}.text`)}</p>
