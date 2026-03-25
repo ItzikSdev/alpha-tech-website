@@ -13,6 +13,7 @@ import LoginPage from './pages/LoginPage';
 import SettingsPage from './pages/SettingsPage';
 import PlansPage from './pages/PlansPage';
 import AccessibilityPage from './pages/AccessibilityPage';
+import AccessibilityButton from './components/AccessibilityButton';
 import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/plans" element={<PlansPage />} />
           </Routes>
           <Footer />
+          <AccessibilityButton />
           </BrowserRouter>
         </AuthProvider>
       </LanguageProvider>
