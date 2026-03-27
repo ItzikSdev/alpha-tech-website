@@ -17,7 +17,7 @@ export default function TesterSignupPopup() {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
     const cityParam = params.get("city");
-    setShow(true);
+
     if (ref === "qr") {
       if (cityParam) setCity(cityParam);
       const dismissed = localStorage.getItem("tester_popup_dismissed");
