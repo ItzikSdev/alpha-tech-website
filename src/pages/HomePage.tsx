@@ -30,12 +30,13 @@ export default function HomePage() {
                 </svg>
                 <span>{t('hero.downloadBtn')}</span>
               </a>
-              <a href="#ai" className="btn-secondary">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <polygon points="10 8 16 12 10 16 10 8" />
+              <a href="/chat" className="btn-ai-chat">
+                <div className="btn-ai-chat-border"></div>
+                <div className="btn-ai-chat-bg"></div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
-                <span>{t('hero.howItWorks')}</span>
+                <span>{t('hero.tryAIChat')}</span>
               </a>
             </div>
           </div>
