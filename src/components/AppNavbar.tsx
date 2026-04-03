@@ -80,15 +80,15 @@ export default function AppNavbar({ collapsed, onToggle }: Props) {
           display: 'flex', flexDirection: 'column', alignItems: 'center',
           padding: '12px 0', gap: 4, background: bgDeep, zIndex: 80,
         }}>
-          <MiniBtn icon={<SquarePen size={20} color={accent} />} onClick={() => navigate('/chat')} tooltip={t('appNav.newChat') || 'שיחה חדשה'} />
+          <MiniBtn icon={<SquarePen size={20} color={accent} />} onClick={() => navigate('/chat')} tooltip={t('appNav.newChat') || 'שיחה חדשה'} isDark={isDark} />
           <div style={{ height: 8 }} />
-          <MiniBtn icon={<Truck size={20} />} onClick={() => navigate('/vehicles')} active={isActive('/vehicles')} accent={accent} tooltip={t('appNav.vehicles') || 'רכבים'} />
-          <MiniBtn icon={<FileText size={20} />} onClick={() => navigate('/my-vehicles')} active={isActive('/my-vehicles')} accent={accent} tooltip={t('appNav.myVehicles') || 'הרכבים שלי'} />
-          <MiniBtn icon={<PlusCircle size={20} />} onClick={() => navigate('/publish')} active={isActive('/publish')} accent={accent} tooltip={t('appNav.publish') || 'פרסם רכב'} />
+          <MiniBtn icon={<Truck size={20} />} onClick={() => navigate('/vehicles')} active={isActive('/vehicles')} accent={accent} tooltip={t('appNav.vehicles') || 'רכבים'} isDark={isDark} />
+          <MiniBtn icon={<FileText size={20} />} onClick={() => navigate('/my-vehicles')} active={isActive('/my-vehicles')} accent={accent} tooltip={t('appNav.myVehicles') || 'הרכבים שלי'} isDark={isDark} />
+          <MiniBtn icon={<PlusCircle size={20} />} onClick={() => navigate('/publish')} active={isActive('/publish')} accent={accent} tooltip={t('appNav.publish') || 'פרסם רכב'} isDark={isDark} />
           <div style={{ flex: 1 }} />
-          <MiniBtn icon={<Settings size={20} />} onClick={() => navigate('/settings')} tooltip={t('appNav.settings') || 'הגדרות'} />
+          <MiniBtn icon={<Settings size={20} />} onClick={() => navigate('/settings')} tooltip={t('appNav.settings') || 'הגדרות'} isDark={isDark} />
           {!token && (
-            <MiniBtn icon={<UserCircle size={20} />} onClick={() => navigate(`/login?from=${location.pathname}`)} tooltip={t('nav.login') || 'כניסה'} />
+            <MiniBtn icon={<UserCircle size={20} />} onClick={() => navigate(`/login?from=${location.pathname}`)} tooltip={t('nav.login') || 'כניסה'} isDark={isDark} />
           )}
         </div>
       )}
@@ -219,11 +219,12 @@ function Btn({ icon, label, onClick, active, outlined, small, colors }: {
 }
 
 /* ── Mini icon button (collapsed rail) ── */
-function MiniBtn({ icon, onClick, active, accent, tooltip }: {
-  icon: React.ReactNode; onClick: () => void; active?: boolean; accent?: string; tooltip?: string;
+function MiniBtn({ icon, onClick, active, accent, tooltip, isDark }: {
+  icon: React.ReactNode; onClick: () => void; active?: boolean; accent?: string; tooltip?: string; isDark?: boolean;
 }) {
   const [hover, setHover] = useState(false);
   const ac = accent || '#22D3EE';
+  const dark = isDark ?? true;
 
   return (
     <button
@@ -233,8 +234,8 @@ function MiniBtn({ icon, onClick, active, accent, tooltip }: {
       title={tooltip}
       style={{
         width: 40, height: 40, borderRadius: 12, border: 'none',
-        background: active ? 'rgba(34,211,238,0.12)' : hover ? 'rgba(255,255,255,0.06)' : 'transparent',
-        color: active ? ac : hover ? '#22D3EE' : '#8B949E',
+        background: active ? 'rgba(34,211,238,0.12)' : hover ? (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)') : 'transparent',
+        color: active ? ac : hover ? (dark ? '#F0F6FC' : '#1A1A1A') : '#8B949E',
         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}
     >
