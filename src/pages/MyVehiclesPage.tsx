@@ -144,7 +144,7 @@ export default function MyVehiclesPage() {
       {/* FAB */}
       {vehicles.length > 0 && !showAdd && (
         <button onClick={() => setShowAdd(true)} style={{
-          position: 'fixed', bottom: 24, right: 24, width: 52, height: 52, borderRadius: 26, border: 'none',
+          position: 'fixed', bottom: 24, right: 64, width: 52, height: 52, borderRadius: 26, border: 'none',
           background: 'linear-gradient(135deg, #22D3EE, #0891B2)', color: '#fff', cursor: 'pointer',
           boxShadow: '0 4px 16px rgba(34,211,238,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50,
         }}>
