@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(data.accessToken);
       setUser(data.user);
       localStorage.setItem('ac-token', data.accessToken);
+      if ((data as any).refreshToken) localStorage.setItem('ac-refresh-token', (data as any).refreshToken);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);
@@ -82,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(data.accessToken);
       setUser(data.user);
       localStorage.setItem('ac-token', data.accessToken);
+      if ((data as any).refreshToken) localStorage.setItem('ac-refresh-token', (data as any).refreshToken);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'OAuth login failed';
       setError(message);
@@ -95,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setToken(null);
     localStorage.removeItem('ac-token');
+    localStorage.removeItem('ac-refresh-token');
   }, []);
 
   const deleteAccount = useCallback(async () => {

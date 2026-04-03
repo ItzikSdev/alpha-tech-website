@@ -40,6 +40,7 @@ export default function MyVehicleDetailPage() {
   const [tab, setTab] = useState<'info' | 'service'>('info');
   const [editNickname, setEditNickname] = useState(false);
   const [nicknameInput, setNicknameInput] = useState('');
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
 
   const fetchVehicle = useCallback(async () => {
     if (!token || !id) return;
@@ -63,12 +64,11 @@ export default function MyVehicleDetailPage() {
   };
 
   const handleDelete = async () => {
-    const name = vehicle?.nickname || `${vehicle?.brand ?? ''} ${vehicle?.vehicleModel ?? ''}`.trim() || vehicle?.plateNumber;
-    if (!confirm(`להסיר את ${name} מהרשימה?`)) return;
     try {
       await apiFetch(`/maintenance/${id}`, { method: 'DELETE', token: token! });
       navigate('/my-vehicles');
     } catch { /* */ }
+    setShowDeletePopup(false);
   };
 
   const handleSaveNickname = async () => {
@@ -129,7 +129,7 @@ export default function MyVehicleDetailPage() {
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: text }}>{vehicleName}</h2>
             <span style={{ fontSize: 12, color: accent, fontWeight: 700, letterSpacing: 1 }}>{vehicle.plateNumber}</span>
           </div>
-          <button onClick={handleDelete} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#EF4444', display: 'flex' }}>
+          <button onClick={() => setShowDeletePopup(true)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#EF4444', display: 'flex' }}>
             <Trash2 size={20} />
           </button>
         </div>
@@ -235,10 +235,18 @@ export default function MyVehicleDetailPage() {
             {/* Refresh */}
             <button onClick={handleRefresh} disabled={refreshing} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: 10, borderRadius: 10,
-              border: `1px solid ${border}`, background: 'transparent', color: accent, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+              border: `1px solid ${border}`, background: 'transparent', color: accent,
+              fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
             }}>
-              <RefreshCw size={14} className={refreshing ? 'spin' : ''} /> רענן נתונים
+              {refreshing ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" style={{ animation: 'spin 0.8s linear infinite' }}>
+                  <circle cx="12" cy="12" r="10" stroke={accent} strokeWidth="3" fill="none" strokeDasharray="40 60" strokeLinecap="round" />
+                </svg>
+              ) : (
+                <><RefreshCw size={14} /> רענן נתונים</>
+              )}
             </button>
+            <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
           </>
         )}
 
@@ -259,6 +267,47 @@ export default function MyVehicleDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Delete confirmation popup */}
+      {showDeletePopup && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+          onClick={() => setShowDeletePopup(false)}
+        >
+          <div onClick={(e) => e.stopPropagation()} style={{
+            width: '100%', maxWidth: 360, background: card, borderRadius: 20, padding: 24,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)', direction: isRTL ? 'rtl' : 'ltr',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <div style={{ width: 56, height: 56, borderRadius: 28, background: '#EF444415', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Trash2 size={28} color="#EF4444" />
+              </div>
+            </div>
+            <h3 style={{ margin: '0 0 8px', textAlign: 'center', fontSize: 18, fontWeight: 700, color: text }}>
+              הסרת רכב
+            </h3>
+            <p style={{ margin: '0 0 20px', textAlign: 'center', fontSize: 14, color: textMuted, lineHeight: 1.5 }}>
+              להסיר את <strong style={{ color: text }}>{vehicleName}</strong> מהרשימה?
+              <br />פעולה זו לא ניתנת לביטול.
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setShowDeletePopup(false)} style={{
+                flex: 1, padding: 12, borderRadius: 12, border: `1px solid ${border}`,
+                background: 'transparent', color: textMuted, fontSize: 14, fontWeight: 600,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                ביטול
+              </button>
+              <button onClick={handleDelete} style={{
+                flex: 1, padding: 12, borderRadius: 12, border: 'none',
+                background: '#EF4444', color: '#fff', fontSize: 14, fontWeight: 600,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                מחק
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
