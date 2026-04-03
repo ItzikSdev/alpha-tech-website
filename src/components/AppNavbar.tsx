@@ -1,92 +1,191 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { apiFetch } from '../lib/api';
+import { Menu, SquarePen, Search, Truck, FileText, PlusCircle, MessageSquare, Settings, LogIn, Sun, Moon, Languages } from 'lucide-react';
 
-export default function AppNavbar() {
+interface ChatSession { _id: string; title: string; }
+interface Props { collapsed: boolean; onToggle: () => void; }
+
+export default function AppNavbar({ collapsed, onToggle }: Props) {
   const { user, token } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, lang, setLang } = useLanguage();
+  const navigate = useNavigate();
   const location = useLocation();
+  const isRTL = lang === 'he' || lang === 'ru';
+  const isDark = theme === 'dark';
 
-  const isActive = (path: string) => location.pathname === path;
+  const [search, setSearch] = useState('');
+  const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const bg = isDark ? '#161B22' : '#F0F2F5';
+  const bgDeep = isDark ? '#0D1117' : '#E4E6EB';
+  const text = isDark ? '#F0F6FC' : '#1A1A1A';
+  const textMuted = isDark ? '#8B949E' : '#65676B';
+  const border = isDark ? '#21262D' : '#D1D5DB';
+  const hoverBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+  const accent = '#22D3EE';
+
+  const isActive = (path: string) => location.pathname.startsWith(path);
+  const go = (path: string) => { navigate(path); onToggle(); };
+
+  const fetchHistory = useCallback(async () => {
+    if (!token) return;
+    try {
+      const data = await apiFetch<{ success: boolean; sessions: ChatSession[] }>('/chat-history', { token });
+      if (data.success) setChatHistory(data.sessions || []);
+    } catch { /* ignore */ }
+  }, [token]);
+
+  useEffect(() => { fetchHistory(); }, [fetchHistory]);
+
+  const filtered = search ? chatHistory.filter((c) => c.title.toLowerCase().includes(search.toLowerCase())) : chatHistory;
+  const open = !collapsed;
 
   return (
-    <aside className="app-sidebar">
-      {/* Top — New chat */}
-      <div className="app-sidebar-top">
-        <Link to="/chat" className="app-sidebar-new-chat">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          <span>{t('appNav.newChat')}</span>
-        </Link>
-      </div>
-
-      {/* Nav items */}
-      <nav className="app-sidebar-nav">
-        <Link to="/chat" className={`app-sidebar-item ${isActive('/chat') ? 'active' : ''}`}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          <span>{t('appNav.chat')}</span>
-        </Link>
-        <Link to="/vehicles" className={`app-sidebar-item ${isActive('/vehicles') ? 'active' : ''}`}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="1" y="3" width="15" height="13" rx="2" /><path d="M16 8h4l3 3v5h-7" />
-            <circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" />
-          </svg>
-          <span>{t('appNav.vehicles')}</span>
-        </Link>
-        <Link to="/my-vehicles" className={`app-sidebar-item ${isActive('/my-vehicles') ? 'active' : ''}`}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-          </svg>
-          <span>{t('appNav.myVehicles')}</span>
-        </Link>
-        <Link to="/publish" className={`app-sidebar-item ${isActive('/publish') ? 'active' : ''}`}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          <span>{t('appNav.publish')}</span>
-        </Link>
-      </nav>
-
-      {/* Bottom — settings + user */}
-      <div className="app-sidebar-bottom">
-        <button className="app-sidebar-item" onClick={toggleTheme}>
-          {theme === 'dark' ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-              <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-            </svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-            </svg>
-          )}
-          <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+    <>
+      {/* Top bar */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, height: 48,
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: '0 12px', background: bgDeep, zIndex: 90,
+        direction: isRTL ? 'rtl' : 'ltr',
+      }}>
+        <button onClick={onToggle} style={{
+          width: 40, height: 40, borderRadius: '50%',
+          border: 'none', background: 'transparent', color: textMuted,
+          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Menu size={22} />
         </button>
-
-        {token ? (
-          <Link to="/settings" className="app-sidebar-item">
-            <div className="app-sidebar-avatar">
-              {user?.displayName?.charAt(0)?.toUpperCase() || '?'}
-            </div>
-            <span>{user?.displayName || t('nav.account')}</span>
-          </Link>
-        ) : (
-          <Link to="/login" className="app-sidebar-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-            </svg>
-            <span>{t('nav.login')}</span>
-          </Link>
-        )}
+        <a href="/chat" style={{ fontSize: 18, fontWeight: 700, color: text, textDecoration: 'none' }}>AlphaCar</a>
       </div>
-    </aside>
+
+      {/* Overlay */}
+      {open && <div onClick={onToggle} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 110 }} />}
+
+      {/* Sidebar */}
+      <div style={{
+        position: 'fixed', top: 0, [isRTL ? 'right' : 'left']: 0,
+        width: 280, height: '100vh', background: bg, zIndex: 120,
+        display: 'flex', flexDirection: 'column', padding: 12, boxSizing: 'border-box',
+        transform: open ? 'translateX(0)' : (isRTL ? 'translateX(100%)' : 'translateX(-100%)'),
+        transition: 'transform 0.2s ease',
+        boxShadow: open ? '0 0 20px rgba(0,0,0,0.3)' : 'none',
+        direction: isRTL ? 'rtl' : 'ltr', overflowY: 'auto',
+      }}>
+
+        <Btn icon={<SquarePen size={18} color={accent} />} label={t('appNav.newChat') || 'שיחה חדשה'} onClick={() => go('/chat')} colors={{ bg: bgDeep, text, border, hover: hoverBg }} outlined />
+
+        {/* Search */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 50, margin: '4px 0 8px', background: bgDeep, border: `1px solid ${border}` }}>
+          <Search size={16} color={textMuted} style={{ flexShrink: 0 }} />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('appNav.searchHistory') || 'חפש בשיחות...'}
+            style={{ border: 'none', outline: 'none', background: 'transparent', color: text, fontSize: 13, width: '100%', fontFamily: 'inherit', direction: isRTL ? 'rtl' : 'ltr' }} />
+        </div>
+
+        {/* Nav */}
+        <div style={{ borderBottom: `1px solid ${border}`, paddingBottom: 8, marginBottom: 4 }}>
+          <Btn icon={<Truck size={18} />} label={t('appNav.vehicles') || 'לוח מודעות רכבים'} onClick={() => go('/vehicles')} active={isActive('/vehicles')} colors={{ bg, text, border, hover: hoverBg, accent }} />
+          <Btn icon={<FileText size={18} />} label={t('appNav.myVehicles') || 'הרכבים שלי'} onClick={() => go('/my-vehicles')} active={isActive('/my-vehicles')} colors={{ bg, text, border, hover: hoverBg, accent }} />
+          <Btn icon={<PlusCircle size={18} />} label={t('appNav.publish') || 'פרסם רכב'} onClick={() => go('/publish')} active={isActive('/publish')} colors={{ bg, text, border, hover: hoverBg, accent }} />
+        </div>
+
+        {/* Chat history */}
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: textMuted, padding: '10px 16px 6px', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            {t('appNav.recentChats') || 'שיחות אחרונות'}
+          </div>
+          {filtered.length === 0 ? (
+            <div style={{ fontSize: 12, color: textMuted, padding: '4px 16px', opacity: 0.6 }}>
+              {!search && (t('appNav.noChats') || 'אין שיחות עדיין')}
+            </div>
+          ) : filtered.slice(0, 30).map((chat) => (
+            <Btn key={chat._id} icon={<MessageSquare size={14} />} label={chat.title} onClick={() => go(`/chat?session=${chat._id}`)} small colors={{ bg, text, border, hover: hoverBg }} />
+          ))}
+        </div>
+
+        {/* Bottom */}
+        <div style={{ borderTop: `1px solid ${border}`, paddingTop: 8, marginTop: 8 }}>
+          {/* Settings popup trigger */}
+          <Btn icon={<Settings size={18} />} label={t('appNav.settings') || 'הגדרות ועזרה'} onClick={() => setShowSettings(!showSettings)} colors={{ bg, text, border, hover: hoverBg }} />
+
+          {/* Settings popup */}
+          {showSettings && (
+            <div style={{ padding: '8px 10px', margin: '4px 0', borderRadius: 12, background: bgDeep, border: `1px solid ${border}`, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {/* Theme toggle */}
+              <button onClick={toggleTheme} style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 10, border: 'none', background: 'transparent', color: text, fontSize: 13, fontWeight: 500, cursor: 'pointer', width: '100%', fontFamily: 'inherit', textAlign: 'start' as const,
+              }}>
+                {isDark ? <Sun size={16} /> : <Moon size={16} />}
+                <span>{isDark ? (t('appNav.lightMode') || 'מצב בהיר') : (t('appNav.darkMode') || 'מצב כהה')}</span>
+              </button>
+              {/* Language */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px' }}>
+                <Languages size={16} color={textMuted} />
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {(['he', 'en', 'ru'] as const).map((l) => (
+                    <button key={l} onClick={() => setLang(l)} style={{
+                      padding: '4px 12px', borderRadius: 8, border: `1px solid ${lang === l ? accent : border}`,
+                      background: lang === l ? 'rgba(34,211,238,0.12)' : 'transparent',
+                      color: lang === l ? accent : textMuted, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                    }}>
+                      {l === 'he' ? 'עב' : l === 'en' ? 'EN' : 'РУ'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* User */}
+          {token ? (
+            <Btn
+              icon={<div style={{ width: 28, height: 28, borderRadius: 14, background: 'linear-gradient(135deg, #22D3EE, #0891B2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, fontWeight: 700 }}>{user?.displayName?.charAt(0)?.toUpperCase() || '?'}</div>}
+              label={user?.displayName || t('nav.account') || 'חשבון'}
+              onClick={() => go('/settings')}
+              colors={{ bg, text, border, hover: hoverBg }}
+            />
+          ) : (
+            <Btn icon={<LogIn size={18} />} label={t('nav.login') || 'כניסה'} onClick={() => { navigate(`/login?from=${location.pathname}`); onToggle(); }} colors={{ bg, text, border, hover: hoverBg }} />
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ── Reusable button ── */
+function Btn({ icon, label, onClick, active, outlined, small, colors }: {
+  icon: React.ReactNode; label: string; onClick: () => void;
+  active?: boolean; outlined?: boolean; small?: boolean;
+  colors: { bg: string; text: string; border: string; hover: string; accent?: string };
+}) {
+  const [hover, setHover] = useState(false);
+  const accent = colors.accent || '#22D3EE';
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: small ? 10 : 14,
+        padding: small ? '8px 16px' : '11px 16px',
+        margin: '1px 0', borderRadius: 50, width: '100%', boxSizing: 'border-box',
+        border: outlined ? `1px solid ${colors.border}` : 'none',
+        background: active ? 'rgba(34,211,238,0.12)' : hover ? colors.hover : outlined ? colors.bg : 'transparent',
+        color: active ? accent : hover ? colors.text : '#8B949E',
+        fontSize: small ? 13 : 14, fontWeight: active ? 600 : 500, fontFamily: 'inherit',
+        cursor: 'pointer', textAlign: 'start' as const, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      }}
+    >
+      <span style={{ flexShrink: 0, display: 'flex' }}>{icon}</span>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+    </button>
   );
 }

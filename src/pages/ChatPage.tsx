@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { apiFetch } from '../lib/api';
+import { useSearchParams } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -12,10 +13,13 @@ interface Message {
 export default function ChatPage() {
   const { token } = useAuth();
   const { t, lang: language } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const sessionParam = searchParams.get('session');
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(sessionParam);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -30,6 +34,42 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Load existing session
+  useEffect(() => {
+    if (!sessionParam || !token) return;
+    apiFetch<{ success: boolean; session: { messages: { role: 'user' | 'ai'; text: string }[] } }>(
+      `/chat-history/${sessionParam}`, { token }
+    ).then((data) => {
+      if (data.success && data.session?.messages) {
+        setMessages(data.session.messages.map((m, i) => ({
+          id: String(i),
+          role: m.role,
+          text: m.text,
+        })));
+        setSessionId(sessionParam);
+      }
+    }).catch(() => {});
+  }, [sessionParam, token]);
+
+  const saveMessage = useCallback(async (role: 'user' | 'ai', text: string, currentSessionId: string | null) => {
+    if (!token) return currentSessionId;
+    try {
+      if (!currentSessionId) {
+        // Create new session
+        const data = await apiFetch<{ success: boolean; session: { _id: string } }>(
+          '/chat-history', { method: 'POST', body: { message: text, language }, token }
+        );
+        if (data.success) return data.session._id;
+      } else {
+        // Add to existing session
+        await apiFetch(`/chat-history/${currentSessionId}/messages`, {
+          method: 'POST', body: { role, text }, token,
+        });
+      }
+    } catch { /* ignore */ }
+    return currentSessionId;
+  }, [token, language]);
+
   const handleSend = useCallback(async (text?: string) => {
     const msg = text || input.trim();
     if (!msg || loading) return;
@@ -38,29 +78,30 @@ export default function ChatPage() {
     setInput('');
     setLoading(true);
 
+    // Save user message + create session if needed
+    const newSessionId = await saveMessage('user', msg, sessionId);
+    if (newSessionId && newSessionId !== sessionId) setSessionId(newSessionId);
+
     try {
       const data = await apiFetch<{ success: boolean; response?: string }>(
         '/search/chat',
         { method: 'POST', body: { message: msg, language }, token: token || undefined }
       );
-      setMessages((prev) => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: 'ai',
-        text: data.response || t('chat.error') || 'שגיאה',
-      }]);
+      const aiText = data.response || t('chat.error') || 'שגיאה';
+      setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'ai', text: aiText }]);
+
+      // Save AI response
+      await saveMessage('ai', aiText, newSessionId || sessionId);
     } catch (err: any) {
-      setMessages((prev) => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: 'ai',
-        text: err?.message === 'SESSION_EXPIRED'
-          ? (t('chat.loginRequired') || 'יש להתחבר כדי להשתמש בצ\'אט AI')
-          : (t('chat.error') || 'שגיאה, נסה שוב'),
-      }]);
+      const errText = err?.message === 'SESSION_EXPIRED'
+        ? (t('chat.loginRequired') || 'יש להתחבר')
+        : (t('chat.error') || 'שגיאה');
+      setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'ai', text: errText }]);
     } finally {
       setLoading(false);
       inputRef.current?.focus();
     }
-  }, [input, loading, token, language, t]);
+  }, [input, loading, token, language, t, sessionId, saveMessage]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -102,7 +143,6 @@ export default function ChatPage() {
             <span className="typing-dot" style={{ animationDelay: '0.4s' }}>●</span>
           </div>
         )}
-
         <div ref={messagesEndRef} />
       </div>
 

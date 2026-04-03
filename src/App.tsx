@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
@@ -20,27 +21,29 @@ import ChatPage from './pages/ChatPage';
 import VehiclesPage from './pages/VehiclesPage';
 import VehicleDetailPage from './pages/VehicleDetailPage';
 import MyVehiclesPage from './pages/MyVehiclesPage';
+import MyVehicleDetailPage from './pages/MyVehicleDetailPage';
 import PublishPage from './pages/PublishPage';
 
-// App routes use the left sidebar; marketing pages use the full navbar
 const APP_ROUTES = ['/chat', '/vehicles', '/my-vehicles', '/publish', '/vehicle/'];
 
 function LayoutWrapper() {
   const location = useLocation();
   const isAppRoute = APP_ROUTES.some((r) => location.pathname.startsWith(r));
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   if (isAppRoute) {
     return (
       <>
         <ScrollToTop />
         <div className="app-layout">
-          <AppNavbar />
+          <AppNavbar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
           <main className="app-main">
             <Routes>
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/vehicles" element={<VehiclesPage />} />
               <Route path="/vehicle/:id" element={<VehicleDetailPage />} />
               <Route path="/my-vehicles" element={<MyVehiclesPage />} />
+              <Route path="/my-vehicles/:id" element={<MyVehicleDetailPage />} />
               <Route path="/publish" element={<PublishPage />} />
             </Routes>
           </main>

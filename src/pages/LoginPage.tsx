@@ -64,10 +64,11 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // Redirect if already logged in
+  // Redirect after login — back to previous page or /chat
+  const from = new URLSearchParams(window.location.search).get('from') || '/chat';
   useEffect(() => {
-    if (token) navigate('/settings', { replace: true });
-  }, [token, navigate]);
+    if (token) navigate(from, { replace: true });
+  }, [token, navigate, from]);
 
   // Google Sign-In callback
   const handleGoogleCallback = useCallback(async (response: { credential: string }) => {

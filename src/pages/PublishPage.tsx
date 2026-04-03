@@ -3,59 +3,64 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { apiFetch } from '../lib/api';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Upload, LogIn, Check } from 'lucide-react';
 
 interface GovData {
-  brand?: string;
-  vehicleModel?: string;
-  year?: number;
-  color?: string;
-  engineType?: string;
-  engineVolume?: number;
-  horsepower?: number;
-  doors?: number;
-  testUntil?: string;
-  firstRegistration?: string;
-  autoDescription?: string;
+  brand?: string; vehicleModel?: string; year?: number; color?: string;
+  engineType?: string; engineVolume?: number; horsepower?: number; doors?: number;
+  testUntil?: string; firstRegistration?: string; autoDescription?: string;
 }
 
 export default function PublishPage() {
   const { token } = useAuth();
-  const { t, lang: language } = useLanguage();
+  const { t, lang } = useLanguage();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
-  const isRTL = language === 'he';
+  const isRTL = lang === 'he';
 
-  // Step 1: plate input, Step 2: form
-  const [step, setStep] = useState<1 | 2>(1);
-  const [plate, setPlate] = useState('');
+  const bg = isDark ? '#0D1117' : '#F8FAFC';
+  const card = isDark ? '#161B22' : '#FFFFFF';
+  const border = isDark ? '#21262D' : '#E2E8F0';
+  const text = isDark ? '#F0F6FC' : '#0F172A';
+  const textMuted = isDark ? '#8B949E' : '#64748B';
+  const accent = '#22D3EE';
+
+  // Check for prefill from MyVehicleDetailPage
+  const params = new URLSearchParams(window.location.search);
+  const hasPrefill = params.get('prefill') === '1';
+
+  const [step, setStep] = useState<1 | 2>(hasPrefill ? 2 : 1);
+  const [plate, setPlate] = useState(params.get('plate') || '');
   const [lookingUp, setLookingUp] = useState(false);
-  const [govData, setGovData] = useState<GovData | null>(null);
-
-  // Form fields
+  const [govData, setGovData] = useState<GovData | null>(hasPrefill ? {
+    brand: params.get('brand') || undefined,
+    vehicleModel: params.get('model') || undefined,
+    year: params.get('year') ? Number(params.get('year')) : undefined,
+    color: params.get('color') || undefined,
+    engineType: params.get('engineType') || undefined,
+  } : null);
   const [price, setPrice] = useState('');
-  const [mileage, setMileage] = useState('');
+  const [mileage, setMileage] = useState(params.get('mileage') || '');
   const [description, setDescription] = useState('');
   const [transmission, setTransmission] = useState('automatic');
   const [photos, setPhotos] = useState<File[]>([]);
   const [publishing, setPublishing] = useState(false);
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%', padding: '12px 14px', borderRadius: 12, border: `1px solid ${border}`,
+    background: bg, color: text, fontSize: 14, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+    direction: isRTL ? 'rtl' : 'ltr',
+  };
+
   if (!token) {
     return (
-      <div style={{
-        minHeight: 'calc(100vh - 56px)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 16,
-        backgroundColor: isDark ? '#0a0a0a' : '#fafafa',
-      }}>
-        <p style={{ color: 'var(--text-secondary)' }}>{t('publish.loginRequired') || 'יש להתחבר כדי לפרסם'}</p>
-        <Link to="/login" className="btn-primary" style={{ textDecoration: 'none', padding: '12px 28px' }}>
-          {t('nav.login') || 'כניסה'}
-        </Link>
+      <div style={{ minHeight: 'calc(100vh - 48px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, background: bg, paddingTop: 48, direction: isRTL ? 'rtl' : 'ltr' }}>
+        <p style={{ color: textMuted }}>{t('publish.loginRequired') || 'יש להתחבר כדי לפרסם'}</p>
+        <button onClick={() => navigate('/login?from=/publish')} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 28px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #22D3EE, #0891B2)', color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+          <LogIn size={18} />{t('nav.login') || 'כניסה'}
+        </button>
       </div>
     );
   }
@@ -66,19 +71,14 @@ export default function PublishPage() {
     setLookingUp(true);
     try {
       const data = await apiFetch<{ success: boolean; vehicleFields?: GovData }>(`/vehicles/lookup/${clean}`, { token });
-      if (data.success && data.vehicleFields) {
-        setGovData(data.vehicleFields);
-      }
-    } catch { /* ignore */ }
+      if (data.success && data.vehicleFields) setGovData(data.vehicleFields);
+    } catch { /* */ }
     setLookingUp(false);
     setStep(2);
   };
 
   const handlePublish = async () => {
-    if (!price || !description) {
-      alert(t('publish.fillRequired') || 'מלא מחיר ותיאור');
-      return;
-    }
+    if (!price || !description) { alert(t('publish.fillRequired') || 'מלא מחיר ותיאור'); return; }
     setPublishing(true);
     try {
       const formData = new FormData();
@@ -94,205 +94,96 @@ export default function PublishPage() {
       if (govData?.engineType) formData.append('engineType', govData.engineType);
       photos.forEach((f) => formData.append('photos', f));
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL || 'https://api.alpha-tech.live'}/api/v1/vehicles`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.alpha-tech.live'}/api/v1/vehicles`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData,
+      });
       const data = await res.json();
-      if (data.success) {
-        navigate(`/vehicle/${data.vehicle._id}`);
-      } else {
-        alert(data.error?.message || data.message || 'Error');
-      }
-    } catch (err: any) {
-      alert(err?.message || 'Error');
-    }
+      if (data.success) navigate(`/vehicle/${data.vehicle._id}`);
+      else alert(data.error?.message || data.message || 'Error');
+    } catch (err: any) { alert(err?.message || 'Error'); }
     setPublishing(false);
   };
 
-  const inputStyle = {
-    width: '100%',
-    padding: '12px 16px',
-    borderRadius: 12,
-    border: `1px solid ${isDark ? '#333' : '#ddd'}`,
-    backgroundColor: isDark ? '#141414' : '#fff',
-    color: isDark ? '#fff' : '#111',
-    fontSize: 15,
-    outline: 'none' as const,
-  };
-
-  // Step 1: plate input
+  // Step 1 — plate input
   if (step === 1) {
     return (
-      <div style={{
-        minHeight: 'calc(100vh - 56px)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 20,
-        backgroundColor: isDark ? '#0a0a0a' : '#fafafa',
-        direction: isRTL ? 'rtl' : 'ltr',
-        padding: 32,
-      }}>
-        <div style={{ fontSize: 56 }}>📝</div>
-        <h2 style={{ color: isDark ? '#fff' : '#111', fontSize: 24, fontWeight: 700, margin: 0 }}>
-          {t('publish.title') || 'פרסום רכב'}
-        </h2>
-        <p style={{ color: isDark ? '#888' : '#666', margin: 0, textAlign: 'center' }}>
-          {t('publish.subtitle') || 'הזן מספר רכב ונמלא את הפרטים אוטומטית'}
-        </p>
-        <input
-          value={plate}
-          onChange={(e) => setPlate(e.target.value)}
-          placeholder="1234567"
-          style={{
-            width: 280, padding: '18px 24px', borderRadius: 20, border: '2px solid #3b82f6',
-            backgroundColor: isDark ? '#141414' : '#fff', color: isDark ? '#fff' : '#111',
-            fontSize: 28, fontWeight: 800, letterSpacing: 6, textAlign: 'center', outline: 'none',
-          }}
-        />
-        <button
-          onClick={handleLookup}
-          disabled={lookingUp || plate.replace(/[^0-9]/g, '').length < 5}
-          style={{
-            width: 280, padding: '16px', borderRadius: 14, border: 'none',
-            backgroundColor: '#3b82f6', color: '#fff', fontSize: 16, fontWeight: 700,
-            cursor: 'pointer', opacity: lookingUp ? 0.6 : 1,
-          }}
-        >
-          {lookingUp ? (t('publish.lookingUp') || 'מאתר פרטי רכב...') : (t('publish.continue') || 'המשך')}
+      <div style={{ minHeight: 'calc(100vh - 48px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, background: bg, paddingTop: 48, padding: 32, direction: isRTL ? 'rtl' : 'ltr' }}>
+        <Upload size={48} color={accent} />
+        <h2 style={{ color: text, fontSize: 22, fontWeight: 800, margin: 0 }}>{t('publish.title') || 'פרסום רכב'}</h2>
+        <p style={{ color: textMuted, margin: 0, fontSize: 14, textAlign: 'center' }}>{t('publish.subtitle') || 'הזן מספר רכב ונמלא את הפרטים אוטומטית'}</p>
+        <input value={plate} onChange={(e) => setPlate(e.target.value)} placeholder="1234567" style={{
+          width: 240, padding: '16px 20px', borderRadius: 16, border: `2px solid ${accent}`, background: card, color: text,
+          fontSize: 26, fontWeight: 800, letterSpacing: 5, textAlign: 'center', outline: 'none', fontFamily: 'inherit',
+        }} />
+        <button onClick={handleLookup} disabled={lookingUp || plate.replace(/[^0-9]/g, '').length < 5} style={{
+          width: 240, padding: '14px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #22D3EE, #0891B2)',
+          color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', opacity: lookingUp ? 0.6 : 1, fontFamily: 'inherit',
+        }}>
+          {lookingUp ? '...' : (t('publish.continue') || 'המשך')}
         </button>
-        <button
-          onClick={() => setStep(2)}
-          style={{
-            background: 'none', border: 'none', color: isDark ? '#666' : '#999',
-            fontSize: 13, cursor: 'pointer', textDecoration: 'underline',
-          }}
-        >
+        <button onClick={() => setStep(2)} style={{ background: 'none', border: 'none', color: textMuted, fontSize: 13, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>
           {t('publish.skip') || 'דלג — הזן ידנית'}
         </button>
       </div>
     );
   }
 
-  // Step 2: form
+  // Step 2 — form
   return (
-    <div style={{
-      minHeight: 'calc(100vh - 56px)',
-      backgroundColor: isDark ? '#0a0a0a' : '#fafafa',
-      direction: isRTL ? 'rtl' : 'ltr',
-      padding: '24px 16px 60px',
-    }}>
-      <div style={{ maxWidth: 600, margin: '0 auto' }}>
-        <h2 style={{ color: isDark ? '#fff' : '#111', fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>
-          {t('publish.title') || 'פרסום רכב'}
-        </h2>
+    <div style={{ minHeight: 'calc(100vh - 48px)', background: bg, paddingTop: 64, padding: '64px 16px 60px', direction: isRTL ? 'rtl' : 'ltr' }}>
+      <div style={{ maxWidth: 500, margin: '0 auto' }}>
+        <h2 style={{ color: text, fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>{t('publish.title') || 'פרסום רכב'}</h2>
+
         {govData?.brand && (
-          <p style={{ color: '#3b82f6', fontSize: 14, margin: '0 0 20px' }}>
-            ✅ {govData.brand} {govData.vehicleModel} {govData.year} — {t('publish.autoFilled') || 'מולא אוטומטית'}
+          <p style={{ color: accent, fontSize: 13, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Check size={14} /> {govData.brand} {govData.vehicleModel} {govData.year} — {t('publish.autoFilled') || 'מולא אוטומטית'}
           </p>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Auto-filled fields (read-only) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Gov data summary */}
           {govData?.brand && (
-            <div style={{
-              padding: 16, borderRadius: 14,
-              backgroundColor: isDark ? '#141414' : '#fff',
-              border: `1px solid ${isDark ? '#222' : '#eee'}`,
-            }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {[
-                  ['יצרן', govData.brand],
-                  ['דגם', govData.vehicleModel],
-                  ['שנה', govData.year],
-                  ['צבע', govData.color],
-                  ['דלק', govData.engineType],
-                  ['נפח מנוע', govData.engineVolume ? `${govData.engineVolume} cc` : ''],
-                ].filter(([, v]) => v).map(([label, val], i) => (
-                  <div key={i}>
-                    <div style={{ fontSize: 11, color: isDark ? '#666' : '#999' }}>{label}</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: isDark ? '#fff' : '#111' }}>{val}</div>
-                  </div>
-                ))}
-              </div>
+            <div style={{ padding: 14, borderRadius: 12, background: card, border: `1px solid ${border}`, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {[['יצרן', govData.brand], ['דגם', govData.vehicleModel], ['שנה', govData.year], ['צבע', govData.color], ['דלק', govData.engineType], ['נפח', govData.engineVolume ? `${govData.engineVolume} cc` : '']].filter(([, v]) => v).map(([l, v], i) => (
+                <div key={i}>
+                  <div style={{ fontSize: 11, color: textMuted }}>{l}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: text }}>{v}</div>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* User fields */}
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 600, color: isDark ? '#aaa' : '#555', display: 'block', marginBottom: 6 }}>
-              {t('publish.price') || 'מחיר (₪)'} *
-            </label>
-            <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="150,000" type="number" style={inputStyle} />
-          </div>
+          <Label text={`${t('publish.price') || 'מחיר (₪)'} *`} color={textMuted} />
+          <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="150,000" type="number" style={inputStyle} />
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 600, color: isDark ? '#aaa' : '#555', display: 'block', marginBottom: 6 }}>
-              {t('publish.mileage') || 'קילומטראז\''} *
-            </label>
-            <input value={mileage} onChange={(e) => setMileage(e.target.value)} placeholder="80,000" type="number" style={inputStyle} />
-          </div>
+          <Label text={`${t('publish.mileage') || "קילומטראז'"} *`} color={textMuted} />
+          <input value={mileage} onChange={(e) => setMileage(e.target.value)} placeholder="80,000" type="number" style={inputStyle} />
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 600, color: isDark ? '#aaa' : '#555', display: 'block', marginBottom: 6 }}>
-              {t('publish.transmission') || 'תיבת הילוכים'}
-            </label>
-            <select value={transmission} onChange={(e) => setTransmission(e.target.value)} style={inputStyle}>
-              <option value="automatic">אוטומטית</option>
-              <option value="manual">ידנית</option>
-            </select>
-          </div>
+          <Label text={t('publish.transmission') || 'תיבת הילוכים'} color={textMuted} />
+          <select value={transmission} onChange={(e) => setTransmission(e.target.value)} style={inputStyle}>
+            <option value="automatic">אוטומטית</option>
+            <option value="manual">ידנית</option>
+          </select>
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 600, color: isDark ? '#aaa' : '#555', display: 'block', marginBottom: 6 }}>
-              {t('publish.description') || 'תיאור'} *
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('publish.descPlaceholder') || 'ספר על הרכב...'}
-              rows={4}
-              style={{ ...inputStyle, resize: 'vertical' as const }}
-            />
-          </div>
+          <Label text={`${t('publish.description') || 'תיאור'} *`} color={textMuted} />
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('publish.descPlaceholder') || 'ספר על הרכב...'} rows={4} style={{ ...inputStyle, resize: 'vertical' }} />
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 600, color: isDark ? '#aaa' : '#555', display: 'block', marginBottom: 6 }}>
-              {t('publish.photos') || 'תמונות'}
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={(e) => setPhotos(Array.from(e.target.files || []))}
-              style={inputStyle}
-            />
-            {photos.length > 0 && (
-              <p style={{ fontSize: 12, color: isDark ? '#666' : '#999', margin: '6px 0 0' }}>
-                {photos.length} {t('publish.photosSelected') || 'תמונות נבחרו'}
-              </p>
-            )}
-          </div>
+          <Label text={t('publish.photos') || 'תמונות'} color={textMuted} />
+          <input type="file" accept="image/*" multiple onChange={(e) => setPhotos(Array.from(e.target.files || []))} style={inputStyle} />
+          {photos.length > 0 && <p style={{ fontSize: 12, color: textMuted, margin: '-8px 0 0' }}>{photos.length} {t('publish.photosSelected') || 'תמונות נבחרו'}</p>}
 
-          <button
-            onClick={handlePublish}
-            disabled={publishing}
-            style={{
-              padding: '16px', borderRadius: 14, border: 'none',
-              backgroundColor: '#3b82f6', color: '#fff', fontSize: 16, fontWeight: 700,
-              cursor: 'pointer', opacity: publishing ? 0.6 : 1, marginTop: 8,
-            }}
-          >
-            {publishing ? (t('publish.publishing') || 'מפרסם...') : (t('publish.publishBtn') || 'פרסם רכב')}
+          <button onClick={handlePublish} disabled={publishing} style={{
+            padding: '14px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #22D3EE, #0891B2)',
+            color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', opacity: publishing ? 0.6 : 1, marginTop: 4, fontFamily: 'inherit',
+          }}>
+            {publishing ? '...' : (t('publish.publishBtn') || 'פרסם רכב')}
           </button>
         </div>
       </div>
     </div>
   );
+}
+
+function Label({ text, color }: { text: string; color: string }) {
+  return <label style={{ fontSize: 12, fontWeight: 600, color, marginBottom: -6 }}>{text}</label>;
 }
