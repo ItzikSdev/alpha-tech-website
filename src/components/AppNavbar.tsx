@@ -30,7 +30,7 @@ export default function AppNavbar({ collapsed, onToggle }: Props) {
   }, []);
 
   const bg = isDark ? '#161B22' : '#F0F2F5';
-  const bgDeep = isDark ? '#0D1117' : '#E4E6EB';
+  const bgDeep = isDark ? '#0D1117' : '#F0F2F5';
   const text = isDark ? '#F0F6FC' : '#1A1A1A';
   const textMuted = isDark ? '#8B949E' : '#65676B';
   const border = isDark ? '#21262D' : '#D1D5DB';
@@ -234,7 +234,7 @@ function MiniBtn({ icon, onClick, active, accent, tooltip }: {
       style={{
         width: 40, height: 40, borderRadius: 12, border: 'none',
         background: active ? 'rgba(34,211,238,0.12)' : hover ? 'rgba(255,255,255,0.06)' : 'transparent',
-        color: active ? ac : hover ? '#F0F6FC' : '#8B949E',
+        color: active ? ac : hover ? '#22D3EE' : '#8B949E',
         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}
     >
