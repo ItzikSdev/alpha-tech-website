@@ -57,7 +57,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!sessionParam || !token) return;
     apiFetch<{ success: boolean; session: { messages: { role: 'user' | 'ai'; text: string }[] } }>(
-      `/chat-history/${sessionParam}`, { token }
+      `/chat-history/${sessionParam}`
     ).then((data) => {
       if (data.success && data.session?.messages) {
         setMessages(data.session.messages.map((m, i) => ({ id: String(i), role: m.role, text: m.text })));
@@ -70,10 +70,10 @@ export default function ChatPage() {
     if (!token) return sid;
     try {
       if (!sid) {
-        const data = await apiFetch<{ success: boolean; session: { _id: string } }>('/chat-history', { method: 'POST', body: { message: txt, language: lang }, token });
+        const data = await apiFetch<{ success: boolean; session: { _id: string } }>('/chat-history', { method: 'POST', body: { message: txt, language: lang } });
         if (data.success) return data.session._id;
       } else {
-        await apiFetch(`/chat-history/${sid}/messages`, { method: 'POST', body: { role, text: txt }, token });
+        await apiFetch(`/chat-history/${sid}/messages`, { method: 'POST', body: { role, text: txt } });
       }
     } catch { /* */ }
     return sid;
@@ -82,6 +82,15 @@ export default function ChatPage() {
   const handleSend = useCallback(async (txt?: string) => {
     const msg = txt || input.trim();
     if (!msg || loading) return;
+
+    if (!token) {
+      setMessages((prev) => [...prev,
+        { id: Date.now().toString(), role: 'user', text: msg },
+        { id: (Date.now() + 1).toString(), role: 'ai', text: t('chat.loginRequired') || 'עליך להיות מחובר כדי לשוחח עם AI. לחץ על "כניסה" בתפריט.' },
+      ]);
+      setInput('');
+      return;
+    }
 
     setMessages((prev) => [...prev, { id: Date.now().toString(), role: 'user', text: msg }]);
     setInput('');
@@ -97,7 +106,6 @@ export default function ChatPage() {
       }>('/search/chat', {
         method: 'POST',
         body: { message: msg, lang, sessionId: newSid || sessionId },
-        token: token || undefined,
       });
 
       const aiText = data.reply || t('chat.error') || 'שגיאה';

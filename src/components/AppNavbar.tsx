@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { apiFetch } from '../lib/api';
-import { Menu, SquarePen, Search, Truck, FileText, PlusCircle, MessageSquare, Settings, LogIn, Sun, Moon, Languages } from 'lucide-react';
+import { Menu, SquarePen, Search, Truck, FileText, PlusCircle, MessageSquare, Settings, UserCircle, Sun, Moon, Languages } from 'lucide-react';
 
 interface ChatSession { _id: string; title: string; }
 interface Props { collapsed: boolean; onToggle: () => void; }
@@ -21,6 +21,13 @@ export default function AppNavbar({ collapsed, onToggle }: Props) {
   const [search, setSearch] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
   const [showSettings, setShowSettings] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const bg = isDark ? '#161B22' : '#F0F2F5';
   const bgDeep = isDark ? '#0D1117' : '#E4E6EB';
@@ -64,6 +71,27 @@ export default function AppNavbar({ collapsed, onToggle }: Props) {
         </button>
         <a href="/chat" style={{ fontSize: 18, fontWeight: 700, color: text, textDecoration: 'none' }}>AlphaCar</a>
       </div>
+
+      {/* Mini rail — visible when sidebar is closed (desktop only) */}
+      {!open && !isMobile && (
+        <div style={{
+          position: 'fixed', top: 48, [isRTL ? 'right' : 'left']: 0,
+          width: 56, height: 'calc(100vh - 48px)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          padding: '12px 0', gap: 4, background: bgDeep, zIndex: 80,
+        }}>
+          <MiniBtn icon={<SquarePen size={20} color={accent} />} onClick={() => navigate('/chat')} tooltip={t('appNav.newChat') || 'שיחה חדשה'} />
+          <div style={{ height: 8 }} />
+          <MiniBtn icon={<Truck size={20} />} onClick={() => navigate('/vehicles')} active={isActive('/vehicles')} accent={accent} tooltip={t('appNav.vehicles') || 'רכבים'} />
+          <MiniBtn icon={<FileText size={20} />} onClick={() => navigate('/my-vehicles')} active={isActive('/my-vehicles')} accent={accent} tooltip={t('appNav.myVehicles') || 'הרכבים שלי'} />
+          <MiniBtn icon={<PlusCircle size={20} />} onClick={() => navigate('/publish')} active={isActive('/publish')} accent={accent} tooltip={t('appNav.publish') || 'פרסם רכב'} />
+          <div style={{ flex: 1 }} />
+          <MiniBtn icon={<Settings size={20} />} onClick={() => navigate('/settings')} tooltip={t('appNav.settings') || 'הגדרות'} />
+          {!token && (
+            <MiniBtn icon={<UserCircle size={20} />} onClick={() => navigate(`/login?from=${location.pathname}`)} tooltip={t('nav.login') || 'כניסה'} />
+          )}
+        </div>
+      )}
 
       {/* Overlay */}
       {open && <div onClick={onToggle} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 110 }} />}
@@ -151,7 +179,7 @@ export default function AppNavbar({ collapsed, onToggle }: Props) {
               colors={{ bg, text, border, hover: hoverBg }}
             />
           ) : (
-            <Btn icon={<LogIn size={18} />} label={t('nav.login') || 'כניסה'} onClick={() => { navigate(`/login?from=${location.pathname}`); onToggle(); }} colors={{ bg, text, border, hover: hoverBg }} />
+            <Btn icon={<UserCircle size={18} />} label={t('nav.login') || 'כניסה'} onClick={() => { navigate(`/login?from=${location.pathname}`); onToggle(); }} colors={{ bg, text, border, hover: hoverBg }} />
           )}
         </div>
       </div>
@@ -186,6 +214,31 @@ function Btn({ icon, label, onClick, active, outlined, small, colors }: {
     >
       <span style={{ flexShrink: 0, display: 'flex' }}>{icon}</span>
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+    </button>
+  );
+}
+
+/* ── Mini icon button (collapsed rail) ── */
+function MiniBtn({ icon, onClick, active, accent, tooltip }: {
+  icon: React.ReactNode; onClick: () => void; active?: boolean; accent?: string; tooltip?: string;
+}) {
+  const [hover, setHover] = useState(false);
+  const ac = accent || '#22D3EE';
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      title={tooltip}
+      style={{
+        width: 40, height: 40, borderRadius: 12, border: 'none',
+        background: active ? 'rgba(34,211,238,0.12)' : hover ? 'rgba(255,255,255,0.06)' : 'transparent',
+        color: active ? ac : hover ? '#F0F6FC' : '#8B949E',
+        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}
+    >
+      {icon}
     </button>
   );
 }

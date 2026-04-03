@@ -2140,6 +2140,20 @@ html[data-theme="light"] .app-sidebar-history-item:hover {
   min-height: 100vh;
   background: var(--bg);
   padding-top: 48px; /* space for top bar */
+  padding-left: 56px; /* space for mini rail */
+}
+html[dir="rtl"] .app-main {
+  padding-left: 0;
+  padding-right: 56px;
+}
+@media (max-width: 768px) {
+  .app-main {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  html[dir="rtl"] .app-main {
+    padding-right: 0;
+  }
 }
 
 /* ── CHAT PAGE ── */

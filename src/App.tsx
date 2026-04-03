@@ -29,7 +29,7 @@ const APP_ROUTES = ['/chat', '/vehicles', '/my-vehicles', '/publish', '/vehicle/
 function LayoutWrapper() {
   const location = useLocation();
   const isAppRoute = APP_ROUTES.some((r) => location.pathname.startsWith(r));
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   if (isAppRoute) {
     return (
