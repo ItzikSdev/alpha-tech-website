@@ -2471,6 +2471,36 @@ html[dir="rtl"] .chat-bubble-ai {
 @media (max-width: 600px) {
   .vehicle-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .vehicle-card {
+    display: flex !important;
+    flex-direction: row-reverse;
+    height: 130px;
+  }
+  .vehicle-card-photo {
+    width: 130px;
+    min-width: 130px;
+    height: 100% !important;
+    border-radius: 0;
+  }
+  .vehicle-card-info {
+    flex: 1;
+    padding: 10px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .vehicle-card-info h3 {
+    font-size: 13px !important;
+    margin: 0 0 4px !important;
+  }
+  .vehicle-card-price {
+    font-size: 15px !important;
+  }
+  .vehicle-tag {
+    padding: 2px 6px !important;
+    font-size: 10px !important;
   }
 }
 
@@ -2630,17 +2660,69 @@ html[dir="rtl"] .chat-bubble-ai {
   }
 }
 
-/* ── RESPONSIVE ── */
+/* ── RESPONSIVE MOBILE ── */
+
+/* Medium screens */
+@media (max-width: 768px) {
+  .app-page {
+    padding: 16px 10px;
+  }
+  .app-page h2 {
+    font-size: 18px;
+  }
+  .app-search {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .app-search input {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+}
+
+/* Small screens (phones) */
 @media (max-width: 480px) {
   .app-sidebar {
     width: 85vw;
     max-width: 300px;
   }
+  .app-page {
+    padding: 12px 8px;
+  }
+
+  /* Vehicle detail — stack vertically */
+  .vehicle-detail-gallery {
+    height: 220px !important;
+    border-radius: 12px !important;
+  }
+  .vehicle-detail-title {
+    font-size: 20px !important;
+  }
+  .vehicle-detail-price {
+    font-size: 22px !important;
+  }
+
+  /* Chat */
   .chat-suggestion-chip {
     font-size: 12px;
     padding: 8px 14px;
   }
   .chat-empty h1 {
     font-size: 22px;
+  }
+
+  /* Search filters */
+  .app-search input {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+
+  /* Plate input */
+  .plate-input-field {
+    width: 240px;
+    font-size: 22px;
+    letter-spacing: 4px;
+    padding: 14px 18px;
   }
 }

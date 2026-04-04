@@ -12,6 +12,7 @@ interface Message {
   text: string;
   vehicles?: VehicleCard[];
   followUps?: string[];
+  isQuotaError?: boolean;
 }
 
 interface VehicleCard {
@@ -116,8 +117,20 @@ export default function ChatPage() {
 
       await saveMessage('ai', aiText, newSid || sessionId);
     } catch (err: any) {
-      const errText = err?.message === 'SESSION_EXPIRED' ? (t('chat.loginRequired') || 'יש להתחבר') : (t('chat.error') || 'שגיאה');
-      setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'ai', text: errText }]);
+      let errText: string;
+      if (err?.message === 'SESSION_EXPIRED') {
+        errText = t('chat.loginRequired') || 'יש להתחבר';
+      } else if (err?.rateLimited && err?.retryAfterMs) {
+        const hours = Math.ceil(err.retryAfterMs / 1000 / 60 / 60);
+        const quota = err.quota;
+        errText = `הגעת למגבלת ההודעות היומית (${quota?.messagesUsed || '?'}/${quota?.messagesLimit || '?'} הודעות).\nהמכסה תתחדש בעוד ${hours > 1 ? `${hours} שעות` : 'שעה'}.\n\nלהודעות ללא הגבלה — שדרג את החבילה שלך.`;
+      } else {
+        errText = err?.message || t('chat.error') || 'שגיאה, נסה שוב';
+      }
+      setMessages((prev) => [...prev, {
+        id: (Date.now() + 1).toString(), role: 'ai', text: errText,
+        ...(err?.rateLimited ? { isQuotaError: true } : {}),
+      }]);
     } finally {
       setLoading(false);
       inputRef.current?.focus();
@@ -166,6 +179,16 @@ export default function ChatPage() {
                 border: msg.role === 'ai' ? `1px solid ${border}` : 'none',
               }}>
                 {msg.text}
+                {/* Upgrade button on quota error */}
+                {msg.isQuotaError && (
+                  <Link to="/plans" style={{
+                    display: 'inline-block', marginTop: 10, padding: '8px 20px', borderRadius: 10,
+                    background: 'var(--accent, #3b82f6)', color: '#fff', textDecoration: 'none',
+                    fontSize: 13, fontWeight: 700,
+                  }}>
+                    🚀 שדרג חבילה
+                  </Link>
+                )}
               </div>
 
               {/* Vehicle cards */}

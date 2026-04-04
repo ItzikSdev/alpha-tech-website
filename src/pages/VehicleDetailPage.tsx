@@ -23,12 +23,28 @@ interface Vehicle {
   features: string[];
   safetyRating?: number;
   doors?: number;
+  seats?: number;
   testUntil?: string;
   firstRegistration?: string;
   licensePlate?: string;
   location?: { address: string };
   sellerId?: { displayName?: string; profilePicture?: string };
   createdAt: string;
+  listingType?: 'private' | 'importer';
+  importerName?: string;
+  importerPhone?: string;
+  importerWebsite?: string;
+  youtubeVideoId?: string;
+  trimLevel?: string;
+  bodyType?: string;
+  totalWeight?: number;
+  pollutionLevel?: number;
+  trims?: Array<{
+    name: string;
+    price: number;
+    horsepower?: number;
+    engineVolume?: number;
+  }>;
 }
 
 export default function VehicleDetailPage() {
@@ -42,6 +58,7 @@ export default function VehicleDetailPage() {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -74,19 +91,28 @@ export default function VehicleDetailPage() {
     );
   }
 
+  const isImporter = vehicle.listingType === 'importer';
+
   const specs = [
     vehicle.year && ['שנה', String(vehicle.year)],
-    vehicle.mileage && ['קילומטראז\'', `${vehicle.mileage.toLocaleString()} ק"מ`],
+    !isImporter && vehicle.mileage && ['קילומטראז\'', `${vehicle.mileage.toLocaleString()} ק"מ`],
+    isImporter && ['מצב', 'חדש · 0 ק"מ'],
     vehicle.engineType && ['דלק', fuelLabels[vehicle.engineType] || vehicle.engineType],
     vehicle.transmission && ['תיבת הילוכים', transLabels[vehicle.transmission] || vehicle.transmission],
-    vehicle.engineVolume && ['נפח מנוע', `${vehicle.engineVolume} cc`],
-    vehicle.horsepower && ['כוח סוס', `${vehicle.horsepower} KW`],
+    vehicle.engineVolume && ['נפח מנוע', `${vehicle.engineVolume} סמ"ק`],
+    vehicle.horsepower && ['כ"ס', `${vehicle.horsepower}`],
     vehicle.doors && ['דלתות', String(vehicle.doors)],
+    vehicle.seats && ['מושבים', String(vehicle.seats)],
     vehicle.color && ['צבע', vehicle.color],
-    vehicle.previousOwners != null && ['יד', String(vehicle.previousOwners)],
-    vehicle.safetyRating != null && ['בטיחות', `${vehicle.safetyRating}/5`],
+    !isImporter && vehicle.previousOwners != null && ['יד', String(vehicle.previousOwners)],
+    vehicle.safetyRating != null && ['בטיחות', `${vehicle.safetyRating}`],
+    vehicle.pollutionLevel != null && ['רמת זיהום', `${vehicle.pollutionLevel}`],
+    vehicle.trimLevel && ['רמת גימור', vehicle.trimLevel],
+    vehicle.bodyType && ['סוג מרכב', vehicle.bodyType],
+    vehicle.totalWeight && ['משקל כולל', `${vehicle.totalWeight} ק"ג`],
     vehicle.testUntil && ['תוקף טסט', new Date(vehicle.testUntil).toLocaleDateString()],
     vehicle.firstRegistration && ['עלייה לכביש', new Date(vehicle.firstRegistration).toLocaleDateString()],
+    isImporter && vehicle.importerName && ['יבואן', vehicle.importerName],
   ].filter(Boolean) as [string, string][];
 
   return (
@@ -95,28 +121,70 @@ export default function VehicleDetailPage() {
       backgroundColor: isDark ? '#0a0a0a' : '#fafafa',
       direction: isRTL ? 'rtl' : 'ltr',
     }}>
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 16px 40px' }}>
-        {/* Photo gallery */}
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 12px 40px' }}>
+        {/* Photo / Video gallery */}
         <div style={{
           position: 'relative',
           borderRadius: 20,
           overflow: 'hidden',
           marginTop: 16,
           backgroundColor: isDark ? '#141414' : '#f0f0f0',
-          height: 400,
+          height: window.innerWidth < 480 ? 220 : 400,
         }}>
-          {vehicle.photos?.length > 0 ? (
-            <img
-              src={vehicle.photos[activePhoto]}
-              alt={`${vehicle.brand} ${vehicle.vehicleModel}`}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          {showVideo && vehicle.youtubeVideoId ? (
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${vehicle.youtubeVideoId}?autoplay=1&rel=0`}
+              title={`${vehicle.brand} ${vehicle.vehicleModel}`}
+              frameBorder="0"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              style={{ border: 'none' }}
             />
+          ) : vehicle.photos?.length > 0 ? (
+            <>
+              <img
+                src={vehicle.photos[activePhoto]}
+                alt={`${vehicle.brand} ${vehicle.vehicleModel}`}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                referrerPolicy="no-referrer"
+              />
+              {/* Play button for YouTube — styled */}
+              {isImporter && vehicle.youtubeVideoId && (
+                <button
+                  onClick={() => setShowVideo(true)}
+                  style={{
+                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+                    width: 64, height: 64, borderRadius: 32,
+                    backgroundColor: 'rgba(0,0,0,0.6)', border: '2px solid rgba(255,255,255,0.8)',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'transform 0.2s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'translate(-50%,-50%) scale(1.1)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'translate(-50%,-50%) scale(1)')}
+                >
+                  <span style={{ fontSize: 28, color: '#fff', marginLeft: 4 }}>▶</span>
+                </button>
+              )}
+            </>
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 64, opacity: 0.2 }}>🚗</div>
           )}
 
+          {/* Importer badge */}
+          {isImporter && (
+            <span style={{
+              position: 'absolute', top: 12, right: 12,
+              background: '#3b82f6', color: '#fff', fontSize: 13, fontWeight: 700,
+              padding: '5px 12px', borderRadius: 10,
+            }}>
+              ⭐ חדש מהיבואן
+            </span>
+          )}
+
           {/* Photo dots */}
-          {vehicle.photos?.length > 1 && (
+          {!showVideo && vehicle.photos?.length > 1 && (
             <div style={{
               position: 'absolute',
               bottom: 12,
@@ -134,7 +202,7 @@ export default function VehicleDetailPage() {
                     height: 8,
                     borderRadius: 4,
                     border: 'none',
-                    backgroundColor: i === activePhoto ? '#3b82f6' : 'rgba(255,255,255,0.5)',
+                    backgroundColor: i === activePhoto ? (isImporter ? '#3b82f6' : '#3b82f6') : 'rgba(255,255,255,0.5)',
                     cursor: 'pointer',
                     transition: 'width 0.2s',
                   }}
@@ -144,61 +212,139 @@ export default function VehicleDetailPage() {
           )}
         </div>
 
+        {/* Disclaimer below image for importer */}
+        {isImporter && (vehicle.photos?.length > 0 || vehicle.youtubeVideoId) && (
+          <p style={{ textAlign: 'center', fontSize: 11, color: isDark ? '#555' : '#999', margin: '6px 0 0' }}>
+            התמונה/סרטון להמחשה בלבד ואינם מייצגים את הרכב הספציפי
+          </p>
+        )}
+
         {/* Title + price */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 20, gap: 16 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: isDark ? '#fff' : '#111' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 16, gap: 8 }}>
+          <div style={{ flex: '1 1 200px' }}>
+            <h1 style={{ margin: 0, fontSize: window.innerWidth < 480 ? 20 : 26, fontWeight: 800, color: isDark ? '#fff' : '#111' }}>
               {vehicle.brand} {vehicle.vehicleModel}
             </h1>
-            {vehicle.location?.address && (
+            {isImporter ? (
+              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#3b82f6' }}>
+                🏢 {vehicle.importerName}
+                {vehicle.location?.address && ` · ${vehicle.location.address}`}
+              </p>
+            ) : vehicle.location?.address ? (
               <p style={{ margin: '4px 0 0', fontSize: 13, color: isDark ? '#666' : '#999' }}>
                 📍 {vehicle.location.address}
               </p>
-            )}
+            ) : null}
           </div>
-          <div style={{
-            fontSize: 28,
-            fontWeight: 800,
-            color: '#3b82f6',
-            whiteSpace: 'nowrap',
-          }}>
-            ₪{vehicle.price?.toLocaleString()}
+          <div style={{ textAlign: 'left' }}>
+            {isImporter && <div style={{ fontSize: 11, color: '#3b82f6', fontWeight: 600, marginBottom: 2 }}>מחירון יבואן</div>}
+            <div style={{
+              fontSize: 28,
+              fontWeight: 800,
+              color: isImporter ? '#3b82f6' : '#3b82f6',
+              whiteSpace: 'nowrap',
+            }}>
+              ₪{vehicle.price?.toLocaleString()}
+            </div>
           </div>
         </div>
 
         {/* CTA */}
-        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-          <Link
-            to={`/chat?vehicle=${vehicle._id}`}
-            style={{
-              flex: 1,
-              padding: '14px',
-              borderRadius: 14,
-              backgroundColor: '#3b82f6',
-              color: '#fff',
-              textDecoration: 'none',
-              textAlign: 'center',
-              fontSize: 15,
-              fontWeight: 700,
-            }}
-          >
-            💬 {t('vehicle.chatWithAI') || 'שוחח עם סוכן AI'}
-          </Link>
-          <button
-            style={{
-              padding: '14px 20px',
-              borderRadius: 14,
-              border: `1px solid ${isDark ? '#333' : '#ddd'}`,
-              backgroundColor: 'transparent',
-              color: isDark ? '#fff' : '#111',
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            ❤️
-          </button>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 20 }}>
+          {isImporter && vehicle.importerPhone ? (
+            <a
+              href={`tel:${vehicle.importerPhone}`}
+              style={{
+                flex: 1,
+                padding: '14px',
+                borderRadius: 14,
+                backgroundColor: '#3b82f6',
+                color: '#fff',
+                textDecoration: 'none',
+                textAlign: 'center',
+                fontSize: 15,
+                fontWeight: 700,
+              }}
+            >
+              📞 {vehicle.importerPhone}
+            </a>
+          ) : null}
+          {isImporter && vehicle.importerWebsite && (
+            <a
+              href={vehicle.importerWebsite}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: '14px 20px',
+                borderRadius: 14,
+                border: '1px solid var(--border)',
+                backgroundColor: 'transparent',
+                color: isDark ? '#fff' : '#111',
+                textDecoration: 'none',
+                textAlign: 'center',
+                fontSize: 15,
+                fontWeight: 600,
+              }}
+            >
+              🌐 אתר היבואן
+            </a>
+          )}
+          {!isImporter && (
+            <Link
+              to={`/chat?vehicle=${vehicle._id}`}
+              style={{
+                flex: 1,
+                padding: '14px',
+                borderRadius: 14,
+                backgroundColor: '#3b82f6',
+                color: '#fff',
+                textDecoration: 'none',
+                textAlign: 'center',
+                fontSize: 15,
+                fontWeight: 700,
+              }}
+            >
+              💬 {t('vehicle.chatWithAI') || 'שוחח עם סוכן AI'}
+            </Link>
+          )}
         </div>
+
+        {/* Trim levels */}
+        {isImporter && vehicle.trims && vehicle.trims.length > 1 && (
+          <div style={{ marginTop: 24 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: isDark ? '#fff' : '#111', margin: '0 0 12px' }}>
+              רמות גימור ({vehicle.trims.length})
+            </h3>
+            <div style={{
+              borderRadius: 16, border: `1px solid ${isDark ? '#222' : '#eee'}`,
+              backgroundColor: isDark ? '#141414' : '#fff', overflow: 'hidden',
+            }}>
+              {vehicle.trims.map((trim, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '14px 16px',
+                    borderTop: i > 0 ? `1px solid ${isDark ? '#1e1e1e' : '#f5f5f5'}` : 'none',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: isDark ? '#fff' : '#111' }}>
+                      {trim.name || 'סטנדרט'}
+                    </div>
+                    <div style={{ fontSize: 12, color: isDark ? '#888' : '#666', marginTop: 2, display: 'flex', gap: 10 }}>
+                      {trim.horsepower && <span>⚡ {trim.horsepower} כ"ס</span>}
+                      {trim.engineVolume && <span>🔧 {trim.engineVolume} סמ"ק</span>}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: '#3b82f6', whiteSpace: 'nowrap' }}>
+                    ₪{trim.price?.toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Specs table */}
         <div style={{

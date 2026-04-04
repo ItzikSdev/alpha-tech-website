@@ -36,16 +36,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearError = useCallback(() => setError(null), []);
 
+  // Sync token from localStorage (updated by apiFetch on refresh)
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'ac-token') {
+        setToken(e.newValue);
+        if (!e.newValue) setUser(null);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   // Fetch user profile on mount if token exists
   useEffect(() => {
     if (token && !user) {
       setLoading(true);
       apiFetch<{ success: boolean; user: User }>('/auth/me', { token })
-        .then((data) => setUser(data.user))
-        .catch(() => {
-          // Token expired or invalid
-          localStorage.removeItem('ac-token');
-          setToken(null);
+        .then((data) => {
+          setUser(data.user);
+          // apiFetch may have refreshed the token — pick up the new one
+          const currentToken = localStorage.getItem('ac-token');
+          if (currentToken && currentToken !== token) {
+            setToken(currentToken);
+          }
+        })
+        .catch((err) => {
+          // Only logout if refresh also failed (SESSION_EXPIRED)
+          if (err?.message === 'SESSION_EXPIRED' || err?.message === 'SESSION_REPLACED') {
+            localStorage.removeItem('ac-token');
+            localStorage.removeItem('ac-refresh-token');
+            setToken(null);
+          }
+          // Otherwise the token was refreshed by apiFetch — try again with new token
+          const refreshedToken = localStorage.getItem('ac-token');
+          if (refreshedToken && refreshedToken !== token) {
+            setToken(refreshedToken);
+          }
         })
         .finally(() => setLoading(false));
     }

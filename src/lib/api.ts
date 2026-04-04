@@ -103,7 +103,12 @@ export async function apiFetch<T = unknown>(path: string, options: ApiOptions = 
   const responseData = await res.json();
 
   if (!res.ok) {
-    throw new Error(responseData.error?.message || responseData.message || `Request failed (${res.status})`);
+    const err = new Error(responseData.error || responseData.message || `Request failed (${res.status})`) as any;
+    err.status = res.status;
+    err.rateLimited = responseData.rateLimited || false;
+    err.retryAfterMs = responseData.retryAfterMs || 0;
+    err.quota = responseData.quota || null;
+    throw err;
   }
 
   return responseData as T;
