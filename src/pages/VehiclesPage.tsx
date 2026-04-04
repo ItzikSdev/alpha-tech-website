@@ -213,7 +213,7 @@ export default function VehiclesPage() {
         )}
 
         {/* Infinite scroll sentinel */}
-        <div ref={sentinelRef} style={{ height: 1 }} />
+        <div ref={sentinelRef} style={{ height: 60 }} />
         {loadingMore && (
           <p style={{ textAlign: 'center', padding: 20, color: 'var(--text-secondary)' }}>{t('common.loading') || 'טוען...'}</p>
         )}

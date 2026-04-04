@@ -2424,6 +2424,7 @@ html[dir="rtl"] .chat-bubble-ai {
   min-height: 100vh;
   background: var(--bg);
   padding: 24px 16px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
 }
 .app-page-inner {
   max-width: 1200px;
@@ -2688,6 +2689,7 @@ html[dir="rtl"] .chat-bubble-ai {
   }
   .app-page {
     padding: 12px 8px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   }
 
   /* Vehicle detail — stack vertically */
