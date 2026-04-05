@@ -149,9 +149,7 @@ export default function ChatPage() {
         {messages.length === 0 ? (
           /* Empty state */
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24 }}>
-            <div style={{ width: 56, height: 56, borderRadius: 16, background: 'linear-gradient(135deg, #22D3EE, #0891B2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src={theme === 'dark' ? '/images/AlphaCar-new-logo-text-white.png' : '/images/AlphaCar-new-logo-text-black.png'} alt="" style={{ height: 32, width: 125 }} />
-            </div>
+            <img src={theme === 'dark' ? '/images/AlphaCar-new-logo-text-white.png' : '/images/AlphaCar-new-logo-text-black.png'} alt="" style={{ height: 32, width: 125 }} />
             <h1 style={{ fontSize: 26, fontWeight: 800, color: text, margin: 0 }}>{t('chat.welcome') || 'מה אתה מחפש?'}</h1>
             <p style={{ fontSize: 14, color: textMuted, margin: 0, textAlign: 'center' }}>{t('chat.welcomeSub') || 'חפש רכבים, שאל שאלות, או בדוק פרטי רכב לפי מספר'}</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 480 }}>
