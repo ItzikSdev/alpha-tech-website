@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
 import { Link } from "react-router-dom";
 
 const API_URL = "https://alphacar-backend-5vdk2gfd6a-ew.a.run.app/api/v1";
 
 export default function TesterSignupPopup() {
   const { t } = useLanguage();
+  const { theme } = useTheme();
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -156,7 +158,7 @@ export default function TesterSignupPopup() {
             <div style={{ fontSize: 48, marginBottom: 12, display: "flex", justifyContent: "center" }}>
               {" "}
               <Link to="/" className="nav-logo">
-                <img src="/images/logo.png" alt="AlphaCar" />
+                <img src={theme === 'dark' ? '/images/AlphaCar-new-logo-text-white.png' : '/images/AlphaCar-new-logo-text-black.png'} alt="AlphaCar" style={{ height: 32, width: 125 }} />
                 <span>AlphaCar</span>
               </Link>{" "}
             </div>

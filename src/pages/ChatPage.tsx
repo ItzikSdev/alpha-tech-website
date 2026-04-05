@@ -64,7 +64,7 @@ export default function ChatPage() {
         setMessages(data.session.messages.map((m, i) => ({ id: String(i), role: m.role, text: m.text })));
         setSessionId(sessionParam);
       }
-    }).catch(() => {});
+    }).catch(() => { });
   }, [sessionParam, token]);
 
   const saveMessage = useCallback(async (role: 'user' | 'ai', txt: string, sid: string | null) => {
@@ -86,8 +86,8 @@ export default function ChatPage() {
 
     if (!token) {
       setMessages((prev) => [...prev,
-        { id: Date.now().toString(), role: 'user', text: msg },
-        { id: (Date.now() + 1).toString(), role: 'ai', text: t('chat.loginRequired') || 'עליך להיות מחובר כדי לשוחח עם AI. לחץ על "כניסה" בתפריט.' },
+      { id: Date.now().toString(), role: 'user', text: msg },
+      { id: (Date.now() + 1).toString(), role: 'ai', text: t('chat.loginRequired') || 'עליך להיות מחובר כדי לשוחח עם AI. לחץ על "כניסה" בתפריט.' },
       ]);
       setInput('');
       return;
@@ -150,7 +150,7 @@ export default function ChatPage() {
           /* Empty state */
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24 }}>
             <div style={{ width: 56, height: 56, borderRadius: 16, background: 'linear-gradient(135deg, #22D3EE, #0891B2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src="/images/logo.png" alt="" style={{ width: 32, height: 32 }} />
+              <img src={theme === 'dark' ? '/images/AlphaCar-new-logo-text-white.png' : '/images/AlphaCar-new-logo-text-black.png'} alt="" style={{ height: 32, width: 125 }} />
             </div>
             <h1 style={{ fontSize: 26, fontWeight: 800, color: text, margin: 0 }}>{t('chat.welcome') || 'מה אתה מחפש?'}</h1>
             <p style={{ fontSize: 14, color: textMuted, margin: 0, textAlign: 'center' }}>{t('chat.welcomeSub') || 'חפש רכבים, שאל שאלות, או בדוק פרטי רכב לפי מספר'}</p>

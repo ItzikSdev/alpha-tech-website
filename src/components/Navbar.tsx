@@ -57,8 +57,7 @@ export default function Navbar() {
     <nav className={scrolled ? 'scrolled' : ''}>
       <div className="nav-inner">
         <Link to="/" className="nav-logo">
-          <img src="/images/logo.png" alt="AlphaCar" />
-          <span>AlphaCar</span>
+          <img src={theme === 'dark' ? '/images/AlphaCar-new-logo-text-white.png' : '/images/AlphaCar-new-logo-text-black.png'} alt="AlphaCar" style={{ height: 32, width: 125 }} />
         </Link>
 
         <ul className={`nav-links ${menuOpen ? 'show' : ''}`}>

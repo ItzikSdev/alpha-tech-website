@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 declare global {
   interface Window {
@@ -56,6 +57,7 @@ const EyeOffIcon = () => (
 
 export default function LoginPage() {
   const { t } = useLanguage();
+  const { theme } = useTheme();
   const { oauthLogin, login, loading, error, clearError, token } = useAuth();
   const navigate = useNavigate();
 
@@ -156,7 +158,7 @@ export default function LoginPage() {
         </Link>
 
         <div className="auth-header">
-          <img src="/images/logo.png" alt="AlphaCar" className="auth-logo" />
+          <img src={theme === 'dark' ? '/images/AlphaCar-new-logo-text-white.png' : '/images/AlphaCar-new-logo-text-black.png'} alt="AlphaCar" className="auth-logo" style={{ height: 32, width: 125 }} />
           <h2>{t('login.title')}</h2>
           <p>{t('login.subtitle')}</p>
         </div>
@@ -229,19 +231,15 @@ export default function LoginPage() {
             </button>
           )}
 
-          {/* Apple OAuth — disabled until fully configured
-          {APPLE_CLIENT_ID && (
-            <button
-              type="button"
-              className="oauth-btn oauth-apple"
-              onClick={handleAppleSignIn}
-              disabled={loading}
-            >
-              <AppleIcon />
-              <span>{t('login.apple')}</span>
-            </button>
-          )}
-          */}
+          <button
+            type="button"
+            className="oauth-btn oauth-apple"
+            onClick={handleAppleSignIn}
+            disabled={loading}
+          >
+            <AppleIcon />
+            <span>{t('login.apple')}</span>
+          </button>
         </div>
 
         <p className="auth-footer-text">
