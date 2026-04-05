@@ -4,12 +4,17 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { apiFetch } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
-import { Car, Plus, AlertTriangle, Gauge, Users, ShieldCheck, LogIn } from 'lucide-react';
+import { Car, Plus, AlertTriangle, Gauge, Users, ShieldCheck, LogIn, Megaphone, Eye, Pencil, Share2, XCircle } from 'lucide-react';
 
 interface MaintenanceVehicle {
   _id: string; plateNumber: string; nickname?: string; brand?: string; vehicleModel?: string;
   year?: number; color?: string; motDate?: string; ownerCount?: number; lastOdometer?: number;
   hasOpenRecalls?: boolean; serviceRecords?: any[];
+}
+
+interface PublishedListing {
+  _id: string; licensePlate?: string; brand?: string; vehicleModel?: string; year?: number;
+  price?: number; status?: string; stats?: { views: number };
 }
 
 export default function MyVehiclesPage() {
@@ -28,6 +33,7 @@ export default function MyVehiclesPage() {
   const accent = '#22D3EE';
 
   const [vehicles, setVehicles] = useState<MaintenanceVehicle[]>([]);
+  const [listings, setListings] = useState<PublishedListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [plate, setPlate] = useState('');
   const [adding, setAdding] = useState(false);
@@ -37,11 +43,26 @@ export default function MyVehiclesPage() {
     if (!token) return;
     setLoading(true);
     try {
-      const data = await apiFetch<{ success: boolean; vehicles: MaintenanceVehicle[] }>('/maintenance', { token });
-      if (data.success) setVehicles(data.vehicles);
+      const [maintData, listData] = await Promise.all([
+        apiFetch<{ success: boolean; vehicles: MaintenanceVehicle[] }>('/maintenance', { token }),
+        apiFetch<{ success: boolean; vehicles: PublishedListing[] }>('/vehicles?sellerId=me', { token }),
+      ]);
+      if (maintData.success) setVehicles(maintData.vehicles);
+      if (listData.success) setListings(listData.vehicles || []);
     } catch { /* */ }
     finally { setLoading(false); }
   }, [token]);
+
+  const getListingForPlate = (plateNumber: string) =>
+    listings.find(l => l.licensePlate === plateNumber && l.status !== 'sold');
+
+  const handleDeleteListing = async (listingId: string) => {
+    if (!confirm(t('maintenance.deleteListingConfirm') || 'להסיר את הפרסום?')) return;
+    try {
+      await apiFetch(`/vehicles/${listingId}`, { method: 'DELETE', token: token! });
+      setListings(prev => prev.filter(l => l._id !== listingId));
+    } catch { /* */ }
+  };
 
   useEffect(() => { fetchVehicles(); }, [fetchVehicles]);
 
@@ -119,6 +140,7 @@ export default function MyVehiclesPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {vehicles.map((v) => {
               const motDays = v.motDate ? Math.ceil((new Date(v.motDate).getTime() - Date.now()) / 86400000) : null;
+              const listing = getListingForPlate(v.plateNumber);
               return (
                 <div key={v._id} onClick={() => navigate(`/my-vehicles/${v._id}`)} style={{
                   padding: 14, borderRadius: 14, border: `1px solid ${border}`, background: card, cursor: 'pointer',
@@ -128,6 +150,33 @@ export default function MyVehiclesPage() {
                     <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color: text }}>{v.nickname || `${v.brand ?? ''} ${v.vehicleModel ?? ''}`.trim() || v.plateNumber}</span>
                     <span style={{ color: textMuted, fontSize: 18 }}>‹</span>
                   </div>
+
+                  {/* Published listing banner */}
+                  {listing && (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 8, background: '#22c55e12', border: '1px solid #22c55e25', marginBottom: 8 }}>
+                        <Megaphone size={13} color="#22c55e" />
+                        <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: '#22c55e' }}>{t('maintenance.publishedForSale') || 'מפורסם למכירה'}</span>
+                        {listing.stats?.views != null && (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: textMuted }}>
+                            <Eye size={11} /> {listing.stats.views}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+                        <button onClick={(e) => { e.stopPropagation(); navigate(`/publish?edit=${listing._id}`); }} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', borderRadius: 8, border: 'none', background: `${accent}15`, color: accent, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                          <Pencil size={12} /> {t('maintenance.editListing') || 'ערוך מודעה'}
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); navigator.share?.({ title: `${v.brand} ${v.vehicleModel}`, url: `https://alpha-tech.live/vehicle/${listing._id}` }).catch(() => {}); }} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', borderRadius: 8, border: `1px solid ${border}`, background: 'transparent', color: textMuted, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                          <Share2 size={12} /> {t('maintenance.shareListing') || 'שתף'}
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteListing(listing._id); }} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', borderRadius: 8, border: 'none', background: '#EF444412', color: '#EF4444', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                          <XCircle size={12} /> {t('maintenance.removeListing') || 'הסר פרסום'}
+                        </button>
+                      </div>
+                    </>
+                  )}
+
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                     {v.ownerCount != null && <Badge icon={<Users size={11} />} text={`${v.ownerCount} ידיים`} color={accent} />}
                     {v.lastOdometer != null && <Badge icon={<Gauge size={11} />} text={`${v.lastOdometer.toLocaleString()} ק"מ`} color={textMuted} bg={isDark ? '#1E1E1E' : '#F5F5F5'} />}

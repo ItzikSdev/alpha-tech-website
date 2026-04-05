@@ -154,7 +154,23 @@ export default function VehiclesPage() {
         )}
 
         {loading ? (
-          <p style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>{t('common.loading') || 'טוען...'}</p>
+          <div className="vehicle-grid">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="skeleton-card">
+                <div className="skeleton-img" />
+                <div className="skeleton-body">
+                  <div className="skeleton-line w60" />
+                  <div className="skeleton-line h20 w40" />
+                  <div className="skeleton-chips">
+                    <div className="skeleton-chip" />
+                    <div className="skeleton-chip" />
+                    <div className="skeleton-chip" />
+                  </div>
+                  <div className="skeleton-line w80" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : vehicles.length === 0 ? (
           <p style={{ textAlign: 'center', padding: 60, color: 'var(--text-secondary)' }}>{t('vehicles.empty') || 'לא נמצאו רכבים'}</p>
         ) : (
