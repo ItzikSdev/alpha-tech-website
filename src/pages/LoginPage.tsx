@@ -119,7 +119,11 @@ export default function LoginPage() {
 
   // Apple Sign-In
   const handleAppleSignIn = async () => {
-    if (!window.AppleID?.auth) return;
+    if (!window.AppleID?.auth) {
+      console.error('[Apple Sign-In] AppleID SDK not loaded');
+      alert('Apple Sign-In is loading. Please try again.');
+      return;
+    }
     clearError();
     try {
       window.AppleID.auth.init({
@@ -134,8 +138,9 @@ export default function LoginPage() {
       const displayName = name ? `${name.firstName || ''} ${name.lastName || ''}`.trim() : undefined;
       await oauthLogin(idToken, 'apple', displayName);
       navigate('/settings');
-    } catch {
-      // error set in context or user cancelled
+    } catch (err: any) {
+      console.error('[Apple Sign-In] Error:', err);
+      // oauthLogin sets error in auth context; popup_closed_by_user is normal
     }
   };
 
