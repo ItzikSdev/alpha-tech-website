@@ -47,6 +47,7 @@ export async function apiFetch<T = unknown>(path: string, options: ApiOptions = 
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
+      cache: 'no-store',
     });
   };
 
