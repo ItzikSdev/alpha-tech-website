@@ -139,8 +139,12 @@ export default function LoginPage() {
       await oauthLogin(idToken, 'apple', displayName);
       navigate('/settings');
     } catch (err: any) {
-      console.error('[Apple Sign-In] Error:', err);
-      // oauthLogin sets error in auth context; popup_closed_by_user is normal
+      const errDetail = err?.error || err?.message || (typeof err === 'object' ? JSON.stringify(err) : String(err));
+      console.error('[Apple Sign-In] Error:', errDetail, err);
+      // popup_closed_by_user is normal (user cancelled)
+      if (err?.error === 'popup_closed_by_user') return;
+      // Show meaningful error to user
+      clearError();
     }
   };
 
