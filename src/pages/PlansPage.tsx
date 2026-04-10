@@ -20,82 +20,6 @@ interface DisplayPlan {
 
 type Lang = 'he' | 'en' | 'ru';
 
-// All plan display data — names/features are hardcoded here so the page
-// always looks correct regardless of which backend version is running.
-// Only priceILS is overridden by the live API response.
-const PLAN_DATA: Record<string, {
-  id: string;
-  productId: string | null;
-  name: Record<Lang, string>;
-  features: Record<Lang, string[]>;
-  priceILS: number;
-  priceUSD: number;
-  period: Record<Lang, string> | null;
-  highlight: boolean;
-  sortOrder: number;
-}> = {
-  free: {
-    id: 'free',
-    productId: null,
-    name: { he: 'חינמי', en: 'Free', ru: 'Бесплатно' },
-    features: {
-      he: ['5 הודעות AI ביום', 'ניתוח בעלויות חכם', 'פרסום מכונית אחת', 'סינון רכבים חינם'],
-      en: ['5 AI messages per day', 'Smart ownership analysis', 'List 1 car', 'Free vehicle filtering'],
-      ru: ['5 AI сообщений в день', 'Умный анализ владения', '1 объявление', 'Бесплатный фильтр авто'],
-    },
-    priceILS: 0,
-    priceUSD: 0,
-    period: null,
-    highlight: false,
-    sortOrder: 0,
-  },
-  alphacar_basic_tokens: {
-    id: 'alphacar_basic_tokens',
-    productId: 'alphacar_basic_tokens',
-    name: { he: 'בייסיק', en: 'Basic', ru: 'Базовый' },
-    features: {
-      he: ['50 הודעות AI', 'ניתוח בעלויות חכם', '+1 פוסט פעיל', 'תשלום חד-פעמי'],
-      en: ['50 AI messages', 'Smart ownership analysis', '+1 active listing', 'One-time payment'],
-      ru: ['50 AI сообщений', 'Умный анализ владения', '+1 активное объявление', 'Разовый платёж'],
-    },
-    priceILS: 15,
-    priceUSD: 4.1,
-    period: null,
-    highlight: false,
-    sortOrder: 1,
-  },
-  alphacar_pro_monthly: {
-    id: 'alphacar_pro_monthly',
-    productId: 'alphacar_pro_monthly',
-    name: { he: 'פרו חודשי', en: 'Pro Monthly', ru: 'Про ежемесячно' },
-    features: {
-      he: ['AI ללא הגבלה', 'ניתוח בעלויות + הערכת שווי', '5 פוסטים במקביל', 'תג מוכר מאומת', 'עדיפות בתוצאות חיפוש'],
-      en: ['Unlimited AI', 'Ownership analysis + valuation', '5 active listings', 'Verified seller badge', 'Priority in search results'],
-      ru: ['Безлимитный AI', 'Анализ владения + оценка', '5 объявлений одновременно', 'Значок проверенного продавца', 'Приоритет в результатах поиска'],
-    },
-    priceILS: 20,
-    priceUSD: 5.4,
-    period: { he: 'חודש', en: 'month', ru: 'месяц' },
-    highlight: true,
-    sortOrder: 2,
-  },
-  alphacar_premium_tokens: {
-    id: 'alphacar_premium_tokens',
-    productId: 'alphacar_premium_tokens',
-    name: { he: 'פרימיום', en: 'Premium', ru: 'Премиум' },
-    features: {
-      he: ['150 הודעות AI', 'ניתוח בעלויות + הערכת שווי', '+3 פוסטים פעילים', 'תשלום חד-פעמי'],
-      en: ['150 AI messages', 'Ownership analysis + valuation', '+3 active listings', 'One-time payment'],
-      ru: ['150 AI сообщений', 'Анализ владения + оценка', '+3 активных объявления', 'Разовый платёж'],
-    },
-    priceILS: 30,
-    priceUSD: 8.1,
-    period: null,
-    highlight: false,
-    sortOrder: 3,
-  },
-};
-
 // Fetch live ILS→USD rate from Frankfurter (no API key needed)
 async function fetchIlsToUsdRate(): Promise<number> {
   try {
@@ -103,60 +27,49 @@ async function fetchIlsToUsdRate(): Promise<number> {
     const d = await r.json();
     return d?.rates?.USD ?? 0.27;
   } catch {
-    return 0.27; // fallback ~3.7 ILS per dollar
+    return 0.27;
   }
 }
 
-// Build display plans, merging live prices from API with static display data
-function buildDisplayPlans(lang: Lang, apiProducts?: any[], ilsToUsd = 0.27): DisplayPlan[] {
-  // Index API products by id (new format) or productId (old format)
-  const apiMap: Record<string, any> = {};
-  for (const p of apiProducts ?? []) {
-    const id = p.id ?? p.productId;
-    if (id) apiMap[id] = p;
-  }
-
-  return Object.values(PLAN_DATA)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((plan) => {
-      const api = apiMap[plan.id];
-      const priceILS = api?.priceILS ?? plan.priceILS;
-      // priceUSD: prefer backend value, otherwise calculate from live rate
-      const priceUSD = api?.priceUSD ?? parseFloat((priceILS * ilsToUsd).toFixed(2));
+// Build display plans entirely from API response (server is the source of truth)
+function buildDisplayPlans(apiProducts: any[], ilsToUsd = 0.27): DisplayPlan[] {
+  return apiProducts
+    .map((p) => {
+      const priceILS = p.priceILS ?? 0;
+      const priceUSD = p.priceUSD ?? parseFloat((priceILS * ilsToUsd).toFixed(2));
       return {
-        id: plan.id,
-        productId: plan.productId,
-        name: plan.name[lang],
-        features: plan.features[lang],
+        id: p.id ?? p.productId ?? 'unknown',
+        productId: p.productId,
+        name: p.name ?? '',
+        features: p.features ?? [],
         priceILS,
         priceUSD,
-        period: plan.period ? plan.period[lang] : null,
-        highlight: plan.highlight,
-        sortOrder: plan.sortOrder,
+        period: p.period ?? null,
+        highlight: p.highlight ?? false,
+        sortOrder: p.sortOrder ?? 99,
       };
-    });
+    })
+    .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 export default function PlansPage() {
   const { t, lang } = useLanguage();
   const containerRef = useScrollReveal();
   const apiLang: Lang = lang === 'he' ? 'he' : lang === 'ru' ? 'ru' : 'en';
-  const [displayPlans, setDisplayPlans] = useState<DisplayPlan[]>(() => buildDisplayPlans(apiLang));
+  const [displayPlans, setDisplayPlans] = useState<DisplayPlan[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setDisplayPlans(buildDisplayPlans(apiLang));
     setLoading(true);
 
-    // Fetch exchange rate and API plans in parallel
     Promise.all([
       fetchIlsToUsdRate(),
       fetch(`${API_BASE}/api/v1/purchases/products?lang=${apiLang}`)
         .then((r) => r.json())
         .catch(() => null),
     ]).then(([ilsToUsd, d]) => {
-      const apiProducts = d?.success && d.products?.length ? d.products : undefined;
-      setDisplayPlans(buildDisplayPlans(apiLang, apiProducts, ilsToUsd));
+      const apiProducts = d?.success && d.products?.length ? d.products : [];
+      setDisplayPlans(buildDisplayPlans(apiProducts, ilsToUsd));
     }).finally(() => setLoading(false));
   }, [lang]);
 
