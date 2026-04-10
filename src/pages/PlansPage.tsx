@@ -20,35 +20,21 @@ interface DisplayPlan {
 
 type Lang = 'he' | 'en' | 'ru';
 
-// Fetch live ILS→USD rate from Frankfurter (no API key needed)
-async function fetchIlsToUsdRate(): Promise<number> {
-  try {
-    const r = await fetch('https://api.frankfurter.app/latest?from=ILS&to=USD');
-    const d = await r.json();
-    return d?.rates?.USD ?? 0.27;
-  } catch {
-    return 0.27;
-  }
-}
-
 // Build display plans entirely from API response (server is the source of truth)
-function buildDisplayPlans(apiProducts: any[], ilsToUsd = 0.27): DisplayPlan[] {
+// priceUSD comes from backend (uses cached Frankfurter rate)
+function buildDisplayPlans(apiProducts: any[]): DisplayPlan[] {
   return apiProducts
-    .map((p) => {
-      const priceILS = p.priceILS ?? 0;
-      const priceUSD = p.priceUSD ?? parseFloat((priceILS * ilsToUsd).toFixed(2));
-      return {
-        id: p.id ?? p.productId ?? 'unknown',
-        productId: p.productId,
-        name: p.name ?? '',
-        features: p.features ?? [],
-        priceILS,
-        priceUSD,
-        period: p.period ?? null,
-        highlight: p.highlight ?? false,
-        sortOrder: p.sortOrder ?? 99,
-      };
-    })
+    .map((p) => ({
+      id: p.id ?? p.productId ?? 'unknown',
+      productId: p.productId,
+      name: p.name ?? '',
+      features: p.features ?? [],
+      priceILS: p.priceILS ?? 0,
+      priceUSD: p.priceUSD ?? 0,
+      period: p.period ?? null,
+      highlight: p.highlight ?? false,
+      sortOrder: p.sortOrder ?? 99,
+    }))
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
@@ -62,15 +48,14 @@ export default function PlansPage() {
   useEffect(() => {
     setLoading(true);
 
-    Promise.all([
-      fetchIlsToUsdRate(),
-      fetch(`${API_BASE}/api/v1/purchases/products?lang=${apiLang}`)
-        .then((r) => r.json())
-        .catch(() => null),
-    ]).then(([ilsToUsd, d]) => {
-      const apiProducts = d?.success && d.products?.length ? d.products : [];
-      setDisplayPlans(buildDisplayPlans(apiProducts, ilsToUsd));
-    }).finally(() => setLoading(false));
+    fetch(`${API_BASE}/api/v1/purchases/products?lang=${apiLang}`)
+      .then((r) => r.json())
+      .catch(() => null)
+      .then((d) => {
+        const apiProducts = d?.success && d.products?.length ? d.products : [];
+        setDisplayPlans(buildDisplayPlans(apiProducts));
+      })
+      .finally(() => setLoading(false));
   }, [lang]);
 
   return (
