@@ -7,7 +7,9 @@ export function useScrollReveal() {
     const el = ref.current;
     if (!el) return;
 
-    const observer = new IntersectionObserver(
+    const observed = new WeakSet<Element>();
+
+    const intersectionObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
@@ -18,10 +20,25 @@ export function useScrollReveal() {
       { threshold: 0.1 }
     );
 
-    const reveals = el.querySelectorAll('.reveal');
-    reveals.forEach((r) => observer.observe(r));
+    // Observe all current .reveal elements
+    const observeAll = () => {
+      el.querySelectorAll('.reveal').forEach((r) => {
+        if (!observed.has(r)) {
+          intersectionObserver.observe(r);
+          observed.add(r);
+        }
+      });
+    };
+    observeAll();
 
-    return () => observer.disconnect();
+    // Watch for new .reveal elements added later (e.g. after async data load)
+    const mutationObserver = new MutationObserver(() => observeAll());
+    mutationObserver.observe(el, { childList: true, subtree: true });
+
+    return () => {
+      intersectionObserver.disconnect();
+      mutationObserver.disconnect();
+    };
   }, []);
 
   return ref;
