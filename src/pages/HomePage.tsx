@@ -1,6 +1,8 @@
 import { useLanguage } from '../context/LanguageContext';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import PhoneCarousel from '../components/PhoneCarousel';
+import MediaShowcase from '../components/MediaShowcase';
+import MaintenanceCarousel from '../components/MaintenanceCarousel';
 
 export default function HomePage() {
   const { t } = useLanguage();
@@ -218,48 +220,15 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
-            <div className="maintenance-phones reveal">
-              <div className="maintenance-phone maintenance-phone-back">
-                <img src="/images/maintenance-record.jpg" alt="Add service record" />
-              </div>
-              <div className="maintenance-phone maintenance-phone-front">
-                <img src="/images/maintenance-detail.jpg" alt="Vehicle maintenance detail" />
-              </div>
-              <div className="maintenance-phone maintenance-phone-side">
-                <img src="/images/maintenance-list.jpg" alt="Maintenance list" />
-              </div>
+            <div className="maintenance-carousel-wrapper reveal">
+              <MaintenanceCarousel />
             </div>
           </div>
         </div>
       </section>
 
-      {/* SHOWCASE */}
-      <section className="showcase" id="showcase">
-        <div className="section-inner">
-          <div className="showcase-grid">
-            <div className="showcase-text reveal">
-              <h2>{t('showcase.title')}</h2>
-              <p>{t('showcase.subtitle')}</p>
-              <ul className="showcase-list">
-                {['showcase.list1', 'showcase.list2', 'showcase.list3', 'showcase.list4', 'showcase.list5'].map((key) => (
-                  <li key={key}>
-                    <span className="check">&#10003;</span>
-                    <span>{t(key)}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="showcase-phones reveal">
-              <div className="showcase-phone">
-                <img src="/images/IMG_3468.PNG" alt="AlphaCar AI Chat Light" />
-              </div>
-              <div className="showcase-phone">
-                <img src="/images/IMG_3470.PNG" alt="AlphaCar AI Chat Dark" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* MEDIA SHOWCASE - Full Width Apple-Style */}
+      <MediaShowcase />
 
       {/* CTA */}
       <section className="cta" id="download">
@@ -272,7 +241,7 @@ export default function HomePage() {
                 <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
               </svg>
               <div className="store-text">
-                <small>{t('cta.availableOn')}</small>
+                <small>{t('cta.comingSoon')}</small>
                 <strong>Google Play</strong>
               </div>
             </a>

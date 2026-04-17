@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 
 const images = [
-  '/images/IMG_3464.PNG',
-  '/images/IMG_3465.PNG',
-  '/images/IMG_3470.PNG',
-  '/images/IMG_3467.PNG',
-  '/images/maintenance-list.jpg',
-  '/images/maintenance-detail.jpg',
+  '/images/IMG_3631.PNG',
+  '/images/IMG_3634.PNG',
+  '/images/IMG_3642.PNG',
+  '/images/maintenance-0.png',
+  '/images/maintenance-1.png',
+  '/images/maintenance-2.png',
 ];
 
 export default function PhoneCarousel() {
