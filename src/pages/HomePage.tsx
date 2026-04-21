@@ -1,15 +1,124 @@
+import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import PhoneCarousel from '../components/PhoneCarousel';
 import MediaShowcase from '../components/MediaShowcase';
 import MaintenanceCarousel from '../components/MaintenanceCarousel';
 
+function TesterModal({ onClose }: { onClose: () => void }) {
+  const { t } = useLanguage();
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus('loading');
+
+    const contactEmail = import.meta.env.VITE_CONTACT_EMAIL || 'info@alpha-tech.live';
+
+    try {
+      const res = await fetch(`https://formsubmit.co/ajax/${contactEmail}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          email,
+          _subject: 'AlphaCar — Google Play Tester Registration',
+          message: `New tester signup: ${email}`,
+        }),
+      });
+      if (res.ok) {
+        setStatus('success');
+      } else {
+        setStatus('error');
+      }
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  return (
+    <div
+      className="tester-modal-backdrop"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="tester-modal">
+        {/* Close button */}
+        <button className="tester-modal-close" onClick={onClose} aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
+        {/* Header */}
+        <div className="tester-modal-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+            <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
+          </svg>
+        </div>
+
+        {status === 'success' ? (
+          <div className="tester-modal-success">
+            <div className="tester-success-check">✓</div>
+            <h3>{t('tester.successTitle')}</h3>
+            <p>{t('tester.successMessage')}</p>
+            <button className="tester-modal-btn" onClick={onClose}>{t('tester.close')}</button>
+          </div>
+        ) : (
+          <>
+            <h2 className="tester-modal-title">{t('tester.title')}</h2>
+            <p className="tester-modal-desc">{t('tester.subtitle')}</p>
+
+            <form onSubmit={handleSubmit} className="tester-form">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t('tester.emailPlaceholder')}
+                className="tester-input"
+                required
+                disabled={status === 'loading'}
+              />
+              <button
+                type="submit"
+                className="tester-modal-btn"
+                disabled={status === 'loading' || !email.trim()}
+              >
+                {status === 'loading' ? (
+                  <span className="tester-spinner" />
+                ) : t('tester.submit')}
+              </button>
+              {status === 'error' && (
+                <p className="tester-error">{t('tester.error')}</p>
+              )}
+            </form>
+
+            <p className="tester-privacy">{t('tester.privacy')}</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const { t } = useLanguage();
   const containerRef = useScrollReveal();
+  const appStoreUrl = import.meta.env.VITE_APP_STORE_URL || '';
+  const playStoreUrl = import.meta.env.VITE_PLAY_STORE_URL || '';
+  const [showTesterModal, setShowTesterModal] = useState(false);
+
+  const handlePlayStoreClick = (e: React.MouseEvent) => {
+    if (!playStoreUrl) {
+      e.preventDefault();
+      setShowTesterModal(true);
+    }
+  };
 
   return (
     <div ref={containerRef}>
+      {showTesterModal && <TesterModal onClose={() => setShowTesterModal(false)} />}
+
       {/* HERO */}
       <section className="hero">
         <div className="hero-inner">
@@ -236,21 +345,32 @@ export default function HomePage() {
           <h2>{t('cta.title')}</h2>
           <p>{t('cta.subtitle')}</p>
           <div className="store-buttons">
-            <a href="#" className="store-btn">
+            <a
+              href={playStoreUrl || '#'}
+              className="store-btn"
+              target={playStoreUrl ? '_blank' : undefined}
+              rel="noopener noreferrer"
+              onClick={handlePlayStoreClick}
+            >
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
               </svg>
               <div className="store-text">
-                <small>{t('cta.comingSoon')}</small>
+                <small>{playStoreUrl ? t('cta.availableOn') : t('cta.comingSoon')}</small>
                 <strong>Google Play</strong>
               </div>
             </a>
-            <a href="#" className="store-btn">
+            <a
+              href={appStoreUrl || '#'}
+              className="store-btn"
+              target={appStoreUrl ? '_blank' : undefined}
+              rel="noopener noreferrer"
+            >
               <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.71,19.5C17.88,20.5 17,21.41 15.88,21.43C14.76,21.45 14.37,20.77 13.1,20.77C11.83,20.77 11.39,21.41 10.34,21.45C9.26,21.48 8.26,20.45 7.42,19.48C5.71,17.5 4.39,13.87 6.15,11.38C7.01,10.15 8.38,9.37 9.86,9.35C10.94,9.33 11.96,10.08 12.63,10.08C13.3,10.08 14.54,9.18 15.83,9.32C16.39,9.34 17.88,9.55 18.83,10.94C18.75,10.99 16.95,12.05 16.97,14.24C17,16.83 19.27,17.69 19.3,17.7C19.27,17.76 18.93,18.89 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
+                <path d="M18.71,19.5C17.88,20.5 17,21.41 15.88,21.43C14.76,21.45 14.37,20.77 13.1,20.77C11.83,20.77 11.39,21.41 10.34,21.45C9.26,21.48 8.26,20.45 7.42,19.48C5.71,17.5 4.39,13.87 6.15,11.38C7.01,10.15 8.38,9.37 9.86,9.35C10.94,9.33 11.96,10.08 12.63,10.08C13.3,10.08 14.54,9.18 15.83,9.32C16.39,9.34 17.88,9.55 18.83,10.94C18.75,10.99 16.95,12.05 16.97,14.24C17,16.87 19.27,17.69 19.3,17.7C19.27,17.76 18.93,18.89 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
               </svg>
               <div className="store-text">
-                <small>{t('cta.comingSoon')}</small>
+                <small>{appStoreUrl ? t('cta.availableOn') : t('cta.comingSoon')}</small>
                 <strong>App Store</strong>
               </div>
             </a>

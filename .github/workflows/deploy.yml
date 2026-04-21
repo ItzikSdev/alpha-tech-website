@@ -40,6 +40,9 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
           VITE_APPLE_CLIENT_ID: ${{ secrets.VITE_APPLE_CLIENT_ID }}
+          VITE_APP_STORE_URL: ${{ secrets.VITE_APP_STORE_URL }}
+          VITE_PLAY_STORE_URL: ${{ secrets.VITE_PLAY_STORE_URL }}
+          VITE_CONTACT_EMAIL: ${{ secrets.VITE_CONTACT_EMAIL }}
 
       - name: Create SPA route files for 200 status
         run: |
