@@ -60,13 +60,27 @@ export default function VehicleDetailPage() {
   const [activePhoto, setActivePhoto] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
 
+  const isPlateNumber = id ? /^\d{5,8}$/.test(id) : false;
+  const appStoreUrl = import.meta.env.VITE_APP_STORE_URL || 'https://apps.apple.com/us/app/alphacar/id6761636676';
+
   useEffect(() => {
     if (!id) return;
+    // If it's a plate number (from maintenance share), try opening the app
+    if (isPlateNumber) {
+      const appLink = `alphacar://vehicle/${id}`;
+      const timer = setTimeout(() => {
+        // App didn't open — stay on the web page
+        setLoading(false);
+      }, 1500);
+      window.location.href = appLink;
+      return () => clearTimeout(timer);
+    }
+    // Otherwise load vehicle by _id from API
     apiFetch<{ success: boolean; vehicle: Vehicle }>(`/vehicles/${id}`)
       .then((d) => { if (d.success) setVehicle(d.vehicle); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, isPlateNumber]);
 
   const fuelLabels: Record<string, string> = {
     gasoline: 'בנזין', diesel: 'דיזל', electric: 'חשמלי', hybrid: 'היברידי', 'plug-in-hybrid': 'פלאג-אין',
@@ -84,6 +98,35 @@ export default function VehicleDetailPage() {
   }
 
   if (!vehicle) {
+    // For plate number links — show "Open in App" page
+    if (isPlateNumber) {
+      return (
+        <div style={{ minHeight: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, backgroundColor: isDark ? '#0a0a0a' : '#fafafa', padding: 24, textAlign: 'center' }}>
+          <div style={{ fontSize: 48 }}>🚗</div>
+          <h2 style={{ color: isDark ? '#e5e7eb' : '#1a1a1a', margin: 0 }}>רכב {id}</h2>
+          <p style={{ color: isDark ? '#888' : '#666', maxWidth: 320 }}>
+            כדי לראות את כל פרטי הרכב, טיפולים ותמונות — פתח באפליקציית AlphaCar
+          </p>
+          <a
+            href={`alphacar://vehicle/${id}`}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', background: 'linear-gradient(135deg, #0891B2, #06B6D4)', color: '#fff', borderRadius: 14, textDecoration: 'none', fontWeight: 700, fontSize: 16 }}
+          >
+            פתח באפליקציה
+          </a>
+          <a
+            href={appStoreUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: isDark ? '#06B6D4' : '#0891B2', textDecoration: 'none', fontSize: 14 }}
+          >
+            אין לך את האפליקציה? הורד מ-App Store →
+          </a>
+          <Link to="/" style={{ color: isDark ? '#666' : '#999', textDecoration: 'none', fontSize: 13, marginTop: 8 }}>
+            חזרה לאתר
+          </Link>
+        </div>
+      );
+    }
     return (
       <div style={{ minHeight: 'calc(100vh - 56px)', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: isDark ? '#0a0a0a' : '#fafafa' }}>
         <div style={{ color: isDark ? '#555' : '#999' }}>{t('vehicles.notFound') || 'רכב לא נמצא'}</div>
