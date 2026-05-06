@@ -105,7 +105,7 @@ export default function HomePage() {
   const { t } = useLanguage();
   const containerRef = useScrollReveal();
   const appStoreUrl = import.meta.env.VITE_APP_STORE_URL || '';
-  const playStoreUrl = import.meta.env.VITE_PLAY_STORE_URL || '';
+  const playStoreUrl = import.meta.env.VITE_PLAY_STORE_URL || 'https://play.google.com/store/apps/details?id=com.alphacar.mobile';
   const [showTesterModal, setShowTesterModal] = useState(false);
 
   const handlePlayStoreClick = (e: React.MouseEvent) => {
