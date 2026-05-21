@@ -240,6 +240,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'privacy.s5.text': 'בהתאם לחוק הגנת הפרטיות, התשמ"א-1981, יש לך זכות: לעיין במידע האישי שנאסף עליך, לבקש תיקון מידע שגוי, לבקש מחיקת המידע והחשבון (דרך הגדרות > מחיקת חשבון), לבקש העברת המידע (Data Portability). לכל בקשה ניתן לפנות: support@alpha-tech.live. נשיב תוך 30 ימי עסקים.',
     'privacy.s6.title': '6. עוגיות (Cookies)',
     'privacy.s6.text': 'האתר והאפליקציה משתמשים בעוגיות לצורך: שמירת העדפות המשתמש, אימות וכניסה אוטומטית, ניתוח שימוש (Google Analytics). ניתן לנהל את הגדרות העוגיות דרך הדפדפן שלך.',
+    'privacy.s7.title': '7. פרסומות (Google AdMob)',
+    'privacy.s7.text': 'האפליקציה משתמשת ב-Google AdMob להצגת פרסומות. AdMob והשותפים שלה (לרבות Google) עשויים לאסוף ולעבד: מזהי פרסום (IDFA ב-iOS, Advertising ID ב-Android), פרטי מכשיר (דגם, מערכת הפעלה, שפה), כתובת IP ומיקום מקורב, נתוני אינטראקציה עם פרסומות. ב-iOS 14.5 ומעלה האפליקציה תבקש אישור דרך App Tracking Transparency. באירופה (EEA/UK/שוויץ) נציג טופס הסכמה (UMP) של Google לפני פרסומות מותאמות אישית. דחייה תשאיר פרסומות לא-מותאמות בלבד. למידע נוסף: policies.google.com/technologies/partner-sites.',
     // Accessibility
     'accessibility.title': 'הצהרת נגישות',
     'accessibility.updated': 'תאריך עדכון: מרץ 2026',
@@ -546,6 +548,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'privacy.s4.text': 'We use advanced security measures including encryption, secure storage, and access control.',
     'privacy.s5.title': '5. Your Rights',
     'privacy.s5.text': 'You have the right to access, correct, delete, or request transfer of your data. Contact us for any request.',
+    'privacy.s6.title': '6. Cookies',
+    'privacy.s6.text': 'The website and app use cookies to: save user preferences, authentication and auto-login, and usage analytics (Google Analytics). You can manage cookie settings through your browser.',
+    'privacy.s7.title': '7. Advertising (Google AdMob)',
+    'privacy.s7.text': 'The app uses Google AdMob to display advertisements. AdMob and its partners (including Google) may collect and process: advertising identifiers (IDFA on iOS, Advertising ID on Android), device details (model, OS, language), IP address and approximate location, and ad interaction data. On iOS 14.5+ the app will request permission via App Tracking Transparency. In the EEA, UK, and Switzerland, we present a Google-certified consent form (UMP) before showing personalized ads. If you decline, you will see non-personalized ads only. More info: policies.google.com/technologies/partner-sites.',
     // Accessibility
     'accessibility.title': 'Accessibility Statement',
     'accessibility.updated': 'Last updated: March 2026',
@@ -852,6 +858,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'privacy.s4.text': 'Мы используем передовые меры безопасности, включая шифрование, безопасное хранение и контроль доступа.',
     'privacy.s5.title': '5. Ваши права',
     'privacy.s5.text': 'Вы имеете право на доступ, исправление, удаление или запрос на передачу ваших данных. Свяжитесь с нами по любому запросу.',
+    'privacy.s6.title': '6. Файлы cookie',
+    'privacy.s6.text': 'Сайт и приложение используют cookies для: сохранения настроек пользователя, аутентификации и автоматического входа, аналитики использования (Google Analytics). Вы можете управлять настройками cookies через ваш браузер.',
+    'privacy.s7.title': '7. Реклама (Google AdMob)',
+    'privacy.s7.text': 'Приложение использует Google AdMob для показа рекламы. AdMob и его партнёры (включая Google) могут собирать и обрабатывать: рекламные идентификаторы (IDFA на iOS, Advertising ID на Android), данные устройства (модель, ОС, язык), IP-адрес и приблизительное местоположение, данные о взаимодействии с рекламой. На iOS 14.5+ приложение запросит разрешение через App Tracking Transparency. В ЕЭЗ, Великобритании и Швейцарии мы показываем сертифицированную Google форму согласия (UMP) перед показом персонализированной рекламы. При отказе вы увидите только неперсонализированную рекламу. Подробнее: policies.google.com/technologies/partner-sites.',
     // Accessibility
     'accessibility.title': 'Заявление о доступности',
     'accessibility.updated': 'Дата обновления: Март 2026',
