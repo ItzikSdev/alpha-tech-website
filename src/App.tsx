@@ -23,8 +23,9 @@ import VehicleDetailPage from './pages/VehicleDetailPage';
 import MyVehiclesPage from './pages/MyVehiclesPage';
 import MyVehicleDetailPage from './pages/MyVehicleDetailPage';
 import PublishPage from './pages/PublishPage';
+import AdminReviewPage from './pages/AdminReviewPage';
 
-const APP_ROUTES = ['/chat', '/vehicles', '/my-vehicles', '/publish', '/vehicle/'];
+const APP_ROUTES = ['/chat', '/vehicles', '/my-vehicles', '/publish', '/vehicle/', '/admin/'];
 
 function LayoutWrapper() {
   const location = useLocation();
@@ -45,6 +46,7 @@ function LayoutWrapper() {
               <Route path="/my-vehicles" element={<MyVehiclesPage />} />
               <Route path="/my-vehicles/:id" element={<MyVehicleDetailPage />} />
               <Route path="/publish" element={<PublishPage />} />
+              <Route path="/admin/review" element={<AdminReviewPage />} />
             </Routes>
           </main>
         </div>
